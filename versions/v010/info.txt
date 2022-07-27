@@ -1,0 +1,3 @@
+v0.1 - Hough with canny
+
+An improved version of the Hough using a canny edge detector.

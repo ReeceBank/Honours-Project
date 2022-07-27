@@ -1,0 +1,5 @@
+v0.3 - Hough with canny, combined with green channel extraction, and skeletonization
+
+An improved version of the Hough using a canny edge detector applied to an adjusted formula of green band extraction, followed by skeletonization by continious erosion.
+
+The formula follows green enchanced with the red and blue channels subtracted from it. Refer to v0.21 for adjustable formula.

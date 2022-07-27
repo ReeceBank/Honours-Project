@@ -1,0 +1,3 @@
+v0.0 - Raw hough transform
+
+This version is the simpelist initial iteration of hough transforms with no other accuracy improving methods such as preprocessing.

@@ -5,7 +5,6 @@ print("Simple script to see .tif modes")
 #run it, ala 
 # > python3 fileviewer
 #or in an IDE
-
 #default image name here
 imagename = 'messed.tif'
 #for when you just hit 'enter' without entering a file name
@@ -16,27 +15,30 @@ def openimage(name):
     image = Image.open(name)
     #number of frames in the image (hidden sub images basically)
     print("Total frames:",image.n_frames)
+
+    #bool check for when you want to show each frame, and not just their mode/width/height/frame count etc
+    displaycheck = input("Do you wish to show() each frame? (y/n)")
+
     for i in range(image.n_frames):
         image.seek(i)
-        print("frame",i,"is mode:")
-        print(image.mode) #so we can see the mode
+        print("Frame",i,"is mode:",image.mode)#so we can see the mode
 
         #can return this, or send it off for processing
         #contains all the data of each pixel
         imagedata = numpy.array(image)
 
         #dont want to process showing 20+ images... 
-        if(image.n_frames<2):
+        if(displaycheck == 'y'):
                 image.show() #shows the image
 
         #same deal as before, dont stall forever loading images arrays.
-        if(image.n_frames<2):
+        if(displaycheck == 'y'):
                 #display the array, will mostly be white, alpha 0 pixels since its the edges too it seems. (for default images)
                 print(imagedata)
 
         #image resolution attributes
-        print("the width of the image is",len(imagedata[0]))
-        print("the height of the image is",len(imagedata))
+        print("Frame",i,"width is",len(imagedata[0]))
+        print("Frame",i,"height is",len(imagedata))
         #alternate ways to see width/height:
         #print(image.width)
         #print(image.height)
@@ -61,13 +63,16 @@ def openimage(name):
         YCbCr-  8 bits per channel, 3 channels
         '''
 
-
 def main():
     name = input('enter image name (without .tif):')
     if name == '':
         openimage(imagename)
     else:
-        openimage(name+'.tif')
+        try:
+            openimage(name+'.tif')
+        except:
+            print("file not found")
+
 
 
 if __name__=="__main__":

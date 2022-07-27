@@ -1,0 +1,3 @@
+v0.11 - Hough with canny adjustable values
+
+An improved version of the Hough using a canny edge detector which has adjustable variables for a ML algorithm, or user inputs.
