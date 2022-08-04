@@ -1,4 +1,5 @@
 
+from re import I
 import sys
 import math
 import cv2 as cv
@@ -15,13 +16,13 @@ import numpy as np
 #Morphological Pruning
 #Final Hough Transforms
 
-default_file = 'rowtest.png' #tested with julians images
+default_file = 'sourceimages/rowtest.png' #tested with julians images
 
 def main():
     
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file), cv.IMREAD_GRAYSCALE)
-    
+    print(src)
     #output canny (not good)
     #easy placeholder until morphological pruning
     dst = cv.Canny(src, 20, 100, None, 3)
@@ -29,6 +30,50 @@ def main():
     # Copy edges to the images that will display the results in BGR
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
     cdstP = np.copy(cdst)
+
+    #kmeans ---------------------
+    
+    image = cv.imread(default_file, cv.IMREAD_GRAYSCALE) # Loading image
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
+    # Reshaping the image into a 2D array of pixels and 3 color values (RGB) 
+    pixel_vals = image.reshape((-1,3)) 
+    # Convert to float type only for supporting cv2.kmean
+    pixel_vals = np.float32(pixel_vals)
+
+    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
+    k = 4 # Choosing number of cluster
+    retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
+
+    
+    centers = np.uint8(centers) # convert data into 8-bit values 
+    print("centres: ",centers)
+    segmented_data = centers[labels.flatten()] # Mapping labels to center points( RGB Value)
+    segmented_image = segmented_data.reshape((image.shape)) # reshape data into the original image dimensions
+    print("First elements: ",segmented_image[0][0])
+    print("y: ",len(segmented_image))
+    print("x: ",len(segmented_image[0]))
+    #quick check to see the minmax of the kmeans (probably an easier way using)
+    min = 999
+    max = -1
+    for n in range(len(segmented_image)):
+        if (segmented_image[n][0][0] >= max):
+            max = segmented_image[n][0][0]
+        elif (segmented_image[n][0][0] <= min):
+            min = segmented_image[n][0][0]
+    
+    for n in range(len(segmented_image)):
+        for i in range(len(segmented_image[0])):
+            if (segmented_image[n][i][0] > min):
+                segmented_image[n][i] = [0,0,0] #the not rows
+            elif (segmented_image[n][i][0] == min):
+                segmented_image[n][i] = [255,255,255] #the rows (painting them green)
+    
+    print("min:", min)
+    print("max:", max)
+    cv.imshow("Kmeans extraction", segmented_image)
+    
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
+    # kmeans
 
     lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
     
