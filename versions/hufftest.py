@@ -16,13 +16,15 @@ import numpy as np
 #Morphological Pruning
 #Final Hough Transforms
 
-default_file = 'sourceimages/rowtest.png' #tested with julians images
+#obersvations:
+#v0.3 has issues because of cannying the kmeans
+
+default_file = 'sourceimages/window2.png' #tested with julians images
 
 def main():
     
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file), cv.IMREAD_GRAYSCALE)
-    print(src)
     #output canny (not good)
     #easy placeholder until morphological pruning
     dst = cv.Canny(src, 20, 100, None, 3)
@@ -41,7 +43,7 @@ def main():
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 4 # Choosing number of cluster
+    k = 3 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -49,9 +51,6 @@ def main():
     print("centres: ",centers)
     segmented_data = centers[labels.flatten()] # Mapping labels to center points( RGB Value)
     segmented_image = segmented_data.reshape((image.shape)) # reshape data into the original image dimensions
-    print("First elements: ",segmented_image[0][0])
-    print("y: ",len(segmented_image))
-    print("x: ",len(segmented_image[0]))
     #quick check to see the minmax of the kmeans (probably an easier way using)
     min = 999
     max = -1
@@ -71,8 +70,12 @@ def main():
     print("min:", min)
     print("max:", max)
     cv.imshow("Kmeans extraction", segmented_image)
-    
-    image = cv.cvtColor(image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
+    print("First elements: ",segmented_image[0][0])
+    print("y: ",len(segmented_image))
+    print("x: ",len(segmented_image[0]))
+
+    segmented_image = cv.cvtColor(segmented_image, cv.COLOR_BGR2GRAY) # Change color to RGB (from BGR)
+    print(segmented_image)
     # kmeans
 
     lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)

@@ -13,12 +13,13 @@ from versions.linedrawer import drawlines, drawlinesp
 #https://medium.com/analytics-vidhya/skeletonization-in-python-using-opencv-b7fa16867331
 version_name = "v031"
 
-default_file = 'sourceimages/rowtest.png' #tested with julians images
+default_file = 'sourceimages/window.png' #tested with julians images
 default_parameter_list = []
 
 def run(src_image, parameter_list):
     # Loads an image
     src = cv.imread(cv.samples.findFile(src_image), cv.IMREAD_ANYCOLOR)
+    cv.imshow("Input", src)
 
     #extract the blue,green,red bands
     b,g,r = cv.split(src)
