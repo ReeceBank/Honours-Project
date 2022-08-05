@@ -19,7 +19,7 @@ import numpy as np
 #obersvations:
 #v0.3 has issues because of cannying the kmeans
 
-default_file = 'sourceimages/window2.png' #tested with julians images
+default_file = 'sourceimages/window.png' #tested with julians images
 
 def main():
     
@@ -75,7 +75,7 @@ def main():
     print("x: ",len(segmented_image[0]))
 
     segmented_image = cv.cvtColor(segmented_image, cv.COLOR_BGR2GRAY) # Change color to RGB (from BGR)
-    print(segmented_image)
+    print("Segmented image: ",segmented_image)
     # kmeans
 
     lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
