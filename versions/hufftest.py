@@ -1,5 +1,3 @@
-
-from re import I
 import sys
 import math
 import cv2 as cv
@@ -19,7 +17,7 @@ import numpy as np
 #obersvations:
 #v0.3 has issues because of cannying the kmeans
 
-default_file = 'sourceimages/window.png' #tested with julians images
+default_file = 'sourceimages/full2.png' #tested with julians images
 
 def main():
     
