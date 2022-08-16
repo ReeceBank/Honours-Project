@@ -23,7 +23,7 @@ def kmeans(input_image):
     print("Kmeans")
     #kmeans ---------------------
     
-    image = cv.imread(input_image, cv.IMREAD_GRAYSCALE) # Loading image
+    image = cv.imread(cv.samples.findFile(default_file)) # Loading image
     image = cv.cvtColor(image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
     # Reshaping the image into a 2D array of pixels and 3 color values (RGB) 
     pixel_vals = image.reshape((-1,3)) 
@@ -31,7 +31,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 3 # Choosing number of cluster
+    k = 4 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -56,7 +56,7 @@ def kmeans(input_image):
             if (segmented_image[n][i][0] > min):
                 segmented_image[n][i] = [0,0,0] #the not rows
             elif (segmented_image[n][i][0] <= min):
-                segmented_image[n][i] = [0,255,0] #the rows (painting them green)
+                segmented_image[n][i] = [255,255,255] #the rows (painting them white)
     
     print("min:", min)
     print("max:", max)
@@ -70,18 +70,55 @@ def kmeans(input_image):
     # ------------------ kmeans
     return segmented_image #the kmeans image
 
-def colourQuantize():
-    #take in an image and reduce it down to max of 12 colour channels, [0 64 128 255]
+def colourQuantize(input_image):
+    quantize_count = 12
+    #take in an image and reduce it down to max of 12 channel types, [0 64 128 255] for r,g,b
     print("Colour Quantization")
+    quantized_image = cv.imread(input_image) # Loading image
+    quantized_image = cv.cvtColor(quantized_image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
+
+    if(quantize_count == 12): #default case when you want 12 total channel types
+        for n in range(len(quantized_image)):
+            for i in range(len(quantized_image[0])):
+                if(quantized_image[n][i][0] < 64):
+                    quantized_image[n][i][0] = 0
+                elif(quantized_image[n][i][0] < 128):
+                    quantized_image[n][i][0] = 64
+                elif(quantized_image[n][i][0] < 255):
+                    quantized_image[n][i][0] = 128
+                else:
+                    quantized_image[n][i][0] = 255
+                
+                if(quantized_image[n][i][1] < 64):
+                    quantized_image[n][i][1] = 0
+                elif(quantized_image[n][i][1] < 128):
+                    quantized_image[n][i][1] = 64
+                elif(quantized_image[n][i][1] < 255):
+                    quantized_image[n][i][1] = 128
+                else:
+                    quantized_image[n][i][1] = 255
+                
+                if(quantized_image[n][i][2] < 64):
+                    quantized_image[n][i][2] = 0
+                elif(quantized_image[n][i][2] < 128):
+                    quantized_image[n][i][2] = 64
+                elif(quantized_image[n][i][2] < 255):
+                    quantized_image[n][i][2] = 128
+                else:
+                    quantized_image[n][i][2] = 255
+        
+    cv.imshow("Quantized 12", quantized_image)
+    return quantized_image
 
 def main():
 
+    prek = colourQuantize(default_file)
     #kmeans ---------------------
-    kmean_image = kmeans(default_file)
+    kmean_image = kmeans(prek)
     # ------------------ kmeans
     
     # Loads an image
-    src = cv.imread(cv.samples.findFile(default_file), cv.IMREAD_GRAYSCALE)
+    src = cv.imread(cv.samples.findFile(default_file))
     #output canny (not good)
     #easy placeholder until morphological pruning
     dst = cv.Canny(kmean_image, 20, 100, None, 3)
@@ -112,13 +149,22 @@ def main():
             l = linesP[i][0]
             cv.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv.LINE_AA)
 
-    cv.imshow("Source", src)
-    cv.imshow("Source", dst)
+    cv.imshow("Original Source", src)
+    cv.imshow("Cannied", dst)
     cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
     cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
     
     cv.waitKey()
     return 0
     
+def quantizetester():
+    test_image = colourQuantize(default_file)
+    cv.imshow("output", test_image)
+    src = cv.imread(cv.samples.findFile(default_file))
+    cv.imshow("input", src)
+    cv.waitKey()
+    return 0
+
+
 if __name__ == "__main__":
     main()
