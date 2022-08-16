@@ -16,6 +16,8 @@ import numpy as np
 
 #obersvations:
 #v0.3 has issues because of cannying the kmeans
+#when no quantization: kmeans 6 and above causes issues (no images, too much removed etc)
+#with quantization this doesnt occur, k of 12+ still generates WORKING IMAGES, HAZA! i guess.
 
 default_file = 'sourceimages/window.png' #tested with julians images
 
