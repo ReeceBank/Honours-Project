@@ -12,7 +12,7 @@ from versions.linedrawer import drawlines, drawlinesp
 
 version_name = "v030"
 
-default_file = 'sourceimages/rowtest.png' #tested with julians images
+default_file = 'sourceimages/real.png' #tested with julians images
 default_parameter_list = []
 
 def run(src_image, parameter_list):

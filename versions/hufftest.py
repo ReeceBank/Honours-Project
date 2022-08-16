@@ -2,9 +2,13 @@ import sys
 import math
 import cv2 as cv
 import numpy as np
+import matplotlib.pyplot as plt
+from statistics import stdev, mean
+from linedrawer import drawlines, drawlinesp
 
 #required installs:
 #pip install opencv-python
+#pip install matplotlib
 
 #skeleton code to help generate hough lines while i work on the:
 #k means binarization
@@ -19,7 +23,7 @@ import numpy as np
 #when no quantization: kmeans 6 and above causes issues (no images, too much removed etc)
 #with quantization this doesnt occur, k of 12+ still generates WORKING IMAGES, HAZA! i guess.
 
-default_file = 'sourceimages/window.png' #tested with julians images
+default_file = 'sourceimages/rowtest.png' #tested with julians images
 
 def kmeans(input_image):
     print("Kmeans")
@@ -112,6 +116,62 @@ def colourQuantize(input_image):
     cv.imshow("Quantized 12", quantized_image)
     return quantized_image
 
+def getThetaData(lines):
+    #for standard hough lines
+    rho_data = []
+    theta_data = []
+    if lines is not None:
+        for i in range(0, len(lines)):
+            rho = lines[i][0][0]
+            rho_data.append(rho)
+            theta = lines[i][0][1]
+            theta_data.append(theta)
+
+    return theta_data
+
+def getThetaDataP(linesP):
+    #for the probabilistic opencv hough line version.
+    theta_datap = []
+    if linesP is not None:
+        for i in range(0, len(linesP)):
+            l = linesP[i][0]
+            x1 = l[0] 
+            y1 = l[1] 
+            x2 = l[2] 
+            y2 = l[3]
+            thetap = (y1 - y2) / (x1 - x2)
+            theta_datap.append(thetap)
+
+
+    return theta_datap
+
+def graphTheta(theta_data):
+    theta_data.sort()
+    intervals = []
+    for i in range(len(theta_data)):
+        intervals.append(i)
+
+    # plotting the theta values
+    plt.plot(intervals, theta_data)
+    # naming the x axis
+    plt.xlabel(' Number of Lines ')
+    # naming the y axis
+    plt.ylabel(' Theta Values ')
+    # graph title
+    plt.title(' Linegraph showings theta values of lines found by Hough Transform ')
+
+    plt.show()
+
+    return 0
+
+def cleanINFdata(data):
+    for i in range(len(data)):
+        if data[i]>100:
+            data[i] = 100
+        elif  data[i]<-100:
+            data[i] = -100
+    return data
+
 def main():
 
     prek = colourQuantize(default_file)
@@ -129,32 +189,35 @@ def main():
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
     cdstP = np.copy(cdst)
 
+    #draw lines on image - non probabalistic
     lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
+    drawlines(cdst,lines)
     
-    if lines is not None:
-        for i in range(0, len(lines)):
-            rho = lines[i][0][0]
-            theta = lines[i][0][1]
-            a = math.cos(theta)
-            b = math.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-            pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-            cv.line(cdst, pt1, pt2, (0,0,255), 3, cv.LINE_AA)
-    
-    
+    #draw lines on image - probabalistic
     linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
-    
-    if linesP is not None:
-        for i in range(0, len(linesP)):
-            l = linesP[i][0]
-            cv.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv.LINE_AA)
+    drawlinesp(cdstP,linesP)
 
     cv.imshow("Original Source", src)
     cv.imshow("Cannied", dst)
     cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
     cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
+
+    # looking at some stats
+    theta_data = getThetaData(lines)
+    theta_dataP = getThetaDataP(linesP)
+
+    clean_theta_data = cleanINFdata(theta_data)
+    clean_theta_dataP = cleanINFdata(theta_dataP)
+
+    #print("Line data: ", clean_theta_data)
+    if len(clean_theta_data) >= 2:
+        print("Standdev of line data: ", stdev(clean_theta_data))
+        print("Mean of line data: ", mean(clean_theta_data))
+    #print("Line dataP: ", clean_theta_dataP)
+    if len(clean_theta_dataP) >= 2:
+        print("Standdev of line dataP: ", stdev(clean_theta_dataP))
+        print("Mean of line dataP: ", mean(clean_theta_dataP))
+    #graphTheta(theta_dataP)
     
     cv.waitKey()
     return 0
