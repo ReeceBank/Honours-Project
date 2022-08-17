@@ -22,12 +22,16 @@ from linedrawer import drawlines, drawlinesp
 #v0.3 has issues because of cannying the kmeans
 #when no quantization: kmeans 6 and above causes issues (no images, too much removed etc)
 #with quantization this doesnt occur, k of 12+ still generates WORKING IMAGES, HAZA! i guess.
+#the idea image would always be at 45 degrees. anomalous images have high stdev (0.7) and clean have low (0.08)
 
-#default_file = 'sourceimages/window.png' #example with good, but is a png
-#default_file = 'sourceimages/bad2-45.png' #example with high standard deviation = bad
-#default_file = 'sourceimages/real2.png' #example of real test thats good
-default_file = 'sourceimages/real.png' #example of real test thats bad but should be good
-#default_file = 'sourceimages/window3.png' #example of real test thats bad but should be good
+#default_file = 'sourceimages/window.png' #example with good, but is a png so cant use
+
+default_file = 'sourceimages/bad2-45.png' #example with high standard deviation = bad ( high stdev )
+#default_file = 'sourceimages/bad2.png' #example where being horizontal (or vertical) messes with results. ( low stdev )
+#default_file = 'sourceimages/real2.png' #example of real test thats good ( low stdev )
+
+#default_file = 'sourceimages/real.png' #example of real test thats bad but should be good ( with shadows )
+#default_file = 'sourceimages/window3.png' #example of real test ( horrible spaced trees )
 
 def kmeans(input_image):
     print("Kmeans")
@@ -41,7 +45,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 4 # Choosing number of cluster
+    k = 3 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -198,7 +202,7 @@ def main():
     drawlines(cdst,lines)
     
     #draw lines on image - probabalistic
-    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
+    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 30, 10)
     drawlinesp(cdstP,linesP)
 
     cv.imshow("Original Source", src)
@@ -217,10 +221,12 @@ def main():
     if len(clean_theta_data) >= 2:
         print("Standdev of line data: ", stdev(clean_theta_data))
         print("Mean of line data: ", mean(clean_theta_data))
+        print("Count of line data: ", len(clean_theta_data))
     #print("Line dataP: ", clean_theta_dataP)
     if len(clean_theta_dataP) >= 2:
         print("Standdev of line dataP: ", stdev(clean_theta_dataP))
         print("Mean of line dataP: ", mean(clean_theta_dataP))
+        print("Count of line dataP: ", len(clean_theta_dataP))
     graphTheta(theta_dataP)
     
     cv.waitKey()
