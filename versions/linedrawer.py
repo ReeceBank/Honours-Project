@@ -3,7 +3,7 @@ import math
 import cv2 as cv
 
 draw_colour = (0,0,255) # bgr in opencv
-line_thickness = 2
+line_thickness = 1
 
 version_name = "Linedrawer"
 

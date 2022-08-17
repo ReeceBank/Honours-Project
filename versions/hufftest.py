@@ -23,7 +23,11 @@ from linedrawer import drawlines, drawlinesp
 #when no quantization: kmeans 6 and above causes issues (no images, too much removed etc)
 #with quantization this doesnt occur, k of 12+ still generates WORKING IMAGES, HAZA! i guess.
 
-default_file = 'sourceimages/rowtest.png' #tested with julians images
+#default_file = 'sourceimages/window.png' #example with good, but is a png
+#default_file = 'sourceimages/bad2-45.png' #example with high standard deviation = bad
+#default_file = 'sourceimages/real2.png' #example of real test thats good
+default_file = 'sourceimages/real.png' #example of real test thats bad but should be good
+#default_file = 'sourceimages/window3.png' #example of real test thats bad but should be good
 
 def kmeans(input_image):
     print("Kmeans")
@@ -64,15 +68,15 @@ def kmeans(input_image):
             elif (segmented_image[n][i][0] <= min):
                 segmented_image[n][i] = [255,255,255] #the rows (painting them white)
     
-    print("min:", min)
-    print("max:", max)
+    #print("min:", min)
+    #print("max:", max)
     cv.imshow("Kmeans extraction", segmented_image)
-    print("First elements: ",segmented_image[0][0])
-    print("y: ",len(segmented_image))
-    print("x: ",len(segmented_image[0]))
+    #print("First elements: ",segmented_image[0][0])
+    #print("y: ",len(segmented_image))
+    #print("x: ",len(segmented_image[0]))
 
     segmented_image = cv.cvtColor(segmented_image, cv.COLOR_BGR2GRAY) # Change color to RGB (from BGR)
-    print("Segmented image: ",segmented_image)
+    #print("Segmented image: ",segmented_image)
     # ------------------ kmeans
     return segmented_image #the kmeans image
 
@@ -217,7 +221,7 @@ def main():
     if len(clean_theta_dataP) >= 2:
         print("Standdev of line dataP: ", stdev(clean_theta_dataP))
         print("Mean of line dataP: ", mean(clean_theta_dataP))
-    #graphTheta(theta_dataP)
+    graphTheta(theta_dataP)
     
     cv.waitKey()
     return 0
