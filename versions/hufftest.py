@@ -22,30 +22,39 @@ from linedrawer import drawlines, drawlinesp
 #v0.3 has issues because of cannying the kmeans
 #when no quantization: kmeans 6 and above causes issues (no images, too much removed etc)
 #with quantization this doesnt occur, k of 12+ still generates WORKING IMAGES, HAZA! i guess.
-#the idea image would always be at 45 degrees. anomalous images have high stdev (0.7) and clean have low (0.08)
+#the ideal image would always be at 45 degrees. anomalous images have high stdev (0.7) and clean have low (0.08)
 
 #default_file = 'sourceimages/window.png' #example with good, but is a png so cant use
 
-default_file = 'sourceimages/bad2-45.png' #example with high standard deviation = bad ( high stdev )
+#default_file = 'sourceimages/bad2-45.png' #example with high standard deviation = bad ( high stdev )
 #default_file = 'sourceimages/bad2.png' #example where being horizontal (or vertical) messes with results. ( low stdev )
 #default_file = 'sourceimages/real2.png' #example of real test thats good ( low stdev )
 
-#default_file = 'sourceimages/real.png' #example of real test thats bad but should be good ( with shadows )
+default_file = 'sourceimages/real.png' #example of real test thats bad but should be good ( with shadows )
 #default_file = 'sourceimages/window3.png' #example of real test ( horrible spaced trees )
 
+#default_file = 'sourceimages/small.png' #example of real test ( horrible spaced trees ) but windowed, so good.
+
+#default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
+#default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
+
 def kmeans(input_image):
+    #A kmeans clusters algorithm that takes in an image (ideally grayscale) and applies a binerization to them.
     print("Kmeans")
     #kmeans ---------------------
+
+    #for when the passed image is actually the name not the array of the image (ie when called first in a modular situation)
+    if isinstance(input_image, str):
+        input_image = cv.imread(input_image) # Loading image
     
-    image = cv.imread(cv.samples.findFile(default_file)) # Loading image
-    image = cv.cvtColor(image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
+    image = cv.cvtColor(input_image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
     # Reshaping the image into a 2D array of pixels and 3 color values (RGB) 
     pixel_vals = image.reshape((-1,3)) 
     # Convert to float type only for supporting cv2.kmean
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 3 # Choosing number of cluster
+    k = 5 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -84,12 +93,33 @@ def kmeans(input_image):
     # ------------------ kmeans
     return segmented_image #the kmeans image
 
+def histogramEqualization(input_image):
+    #A histogram equalization function that takes in an input image and equalizes the colour variance. 
+    #Recommended by Patrick to fix the issue where some tif have heavy shading due to cliffs/clouds.
+    #Ideally takes in a grayscale image.
+    print("Histogram Equalization")
+
+    #for when the passed image is actually the name not the array of the image (ie when called first in a modular situation)
+    if isinstance(input_image, str):
+        input_image = cv.imread(input_image) # Loading image
+
+    c_image = cv.cvtColor(input_image, cv.COLOR_BGR2GRAY) # convert to grayscale
+    histo_image = cv.equalizeHist(c_image)
+    print("Histogram Equalization Complete")
+    return histo_image
+
 def colourQuantize(input_image):
-    quantize_count = 12
+    #reduces the colour spectrum from 255*255*255 colour variations to 3*3*3 total variations
+    #ideally takes in NON grayscale image, RGB only. (or 3 channel images)
+    quantize_count = 12 #how many variation to reduce to. static value because i planned to try out more than 12 combinations.
     #take in an image and reduce it down to max of 12 channel types, [0 64 128 255] for r,g,b
     print("Colour Quantization")
-    quantized_image = cv.imread(input_image) # Loading image
-    quantized_image = cv.cvtColor(quantized_image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
+
+    #for when the passed image is actually the name not the array of the image (ie when called first in a modular situation)
+    if isinstance(input_image, str):
+        input_image = cv.imread(input_image) # Loading image
+    
+    quantized_image = cv.cvtColor(input_image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
 
     if(quantize_count == 12): #default case when you want 12 total channel types
         for n in range(len(quantized_image)):
@@ -125,6 +155,7 @@ def colourQuantize(input_image):
     return quantized_image
 
 def getThetaData(lines):
+    #give a lines list from opencv to get a list of slope values
     #for standard hough lines
     rho_data = []
     theta_data = []
@@ -138,6 +169,7 @@ def getThetaData(lines):
     return theta_data
 
 def getThetaDataP(linesP):
+    #give a lines list from opencv to get a list of slope values
     #for the probabilistic opencv hough line version.
     theta_datap = []
     if linesP is not None:
@@ -154,6 +186,7 @@ def getThetaDataP(linesP):
     return theta_datap
 
 def graphTheta(theta_data):
+    #creates a simple line graph of slope values
     theta_data.sort()
     intervals = []
     for i in range(len(theta_data)):
@@ -173,6 +206,7 @@ def graphTheta(theta_data):
     return 0
 
 def cleanINFdata(data):
+    #simple fix to inf data when determining slope
     for i in range(len(data)):
         if data[i]>100:
             data[i] = 100
@@ -181,14 +215,14 @@ def cleanINFdata(data):
     return data
 
 def main():
-
-    prek = colourQuantize(default_file)
+    # Loads an image
+    src = cv.imread(cv.samples.findFile(default_file))
+    histo = histogramEqualization(src)
+    prek = colourQuantize(src)
     #kmeans ---------------------
     kmean_image = kmeans(prek)
     # ------------------ kmeans
     
-    # Loads an image
-    src = cv.imread(cv.samples.findFile(default_file))
     #output canny (not good)
     #easy placeholder until morphological pruning
     dst = cv.Canny(kmean_image, 20, 100, None, 3)
@@ -202,7 +236,7 @@ def main():
     drawlines(cdst,lines)
     
     #draw lines on image - probabalistic
-    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 30, 10)
+    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
     drawlinesp(cdstP,linesP)
 
     cv.imshow("Original Source", src)
@@ -232,14 +266,15 @@ def main():
     cv.waitKey()
     return 0
     
-def quantizetester():
-    test_image = colourQuantize(default_file)
-    cv.imshow("output", test_image)
-    src = cv.imread(cv.samples.findFile(default_file))
-    cv.imshow("input", src)
-    cv.waitKey()
+def simpletest():
+    test_image = histogramEqualization(default_file)
+    #cv.imshow("output", test_image)
+    #src = cv.imread(cv.samples.findFile(default_file))
+    #cv.imshow("input", src)
+    #cv.waitKey()
     return 0
 
 
 if __name__ == "__main__":
+    #simpletest()
     main()
