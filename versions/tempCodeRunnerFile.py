@@ -1,1 +1,1 @@
-I
+kmean_image

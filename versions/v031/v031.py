@@ -13,7 +13,7 @@ from versions.linedrawer import drawlines, drawlinesp
 #https://medium.com/analytics-vidhya/skeletonization-in-python-using-opencv-b7fa16867331
 version_name = "v031"
 
-default_file = 'sourceimages/specific_image_1.png' #tested with julians images
+default_file = 'sourceimages/rowtest.png' #tested with julians images
 default_parameter_list = []
 
 def run(src_image, parameter_list):

@@ -30,13 +30,17 @@ from linedrawer import drawlines, drawlinesp
 #default_file = 'sourceimages/bad2.png' #example where being horizontal (or vertical) messes with results. ( low stdev )
 #default_file = 'sourceimages/real2.png' #example of real test thats good ( low stdev )
 
-default_file = 'sourceimages/real.png' #example of real test thats bad but should be good ( with shadows )
+#default_file = 'sourceimages/real.png' #example of real test thats bad but should be good ( with shadows )
 #default_file = 'sourceimages/window3.png' #example of real test ( horrible spaced trees )
 
 #default_file = 'sourceimages/small.png' #example of real test ( horrible spaced trees ) but windowed, so good.
 
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
+
+default_file = 'sourceimages/full.png' #test image
+
+
 
 def kmeans(input_image):
     #A kmeans clusters algorithm that takes in an image (ideally grayscale) and applies a binerization to them.
@@ -81,12 +85,7 @@ def kmeans(input_image):
             elif (segmented_image[n][i][0] <= min):
                 segmented_image[n][i] = [255,255,255] #the rows (painting them white)
     
-    #print("min:", min)
-    #print("max:", max)
     cv.imshow("Kmeans extraction", segmented_image)
-    #print("First elements: ",segmented_image[0][0])
-    #print("y: ",len(segmented_image))
-    #print("x: ",len(segmented_image[0]))
 
     segmented_image = cv.cvtColor(segmented_image, cv.COLOR_BGR2GRAY) # Change color to RGB (from BGR)
     #print("Segmented image: ",segmented_image)
@@ -152,6 +151,7 @@ def colourQuantize(input_image):
                     quantized_image[n][i][2] = 255
         
     cv.imshow("Quantized 12", quantized_image)
+    print("Colour Quantization Complete")
     return quantized_image
 
 def getThetaData(lines):
@@ -165,6 +165,9 @@ def getThetaData(lines):
             rho_data.append(rho)
             theta = lines[i][0][1]
             theta_data.append(theta)
+
+    theta_data = np.arctan(theta_data)
+    theta_data = np.degrees(theta_data)
 
     return theta_data
 
@@ -182,6 +185,8 @@ def getThetaDataP(linesP):
             thetap = (y1 - y2) / (x1 - x2)
             theta_datap.append(thetap)
 
+    theta_datap = np.arctan(theta_datap)
+    theta_datap = np.degrees(theta_datap)
 
     return theta_datap
 
@@ -207,21 +212,19 @@ def graphTheta(theta_data):
 
 def cleanINFdata(data):
     #simple fix to inf data when determining slope
-    for i in range(len(data)):
-        if data[i]>100:
-            data[i] = 100
-        elif  data[i]<-100:
-            data[i] = -100
+    # for i in range(len(data)):
+    #     if data[i]>100:
+    #         data[i] = 100
+    #     elif  data[i]<-100:
+    #         data[i] = -100
     return data
 
 def main():
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
     histo = histogramEqualization(src)
-    prek = colourQuantize(src)
-    #kmeans ---------------------
+    prek = colourQuantize(histo)
     kmean_image = kmeans(prek)
-    # ------------------ kmeans
     
     #output canny (not good)
     #easy placeholder until morphological pruning
@@ -241,6 +244,7 @@ def main():
 
     cv.imshow("Original Source", src)
     cv.imshow("Cannied", dst)
+    cv.imshow("Histogramed", histo)
     cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
     cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 
@@ -261,7 +265,7 @@ def main():
         print("Standdev of line dataP: ", stdev(clean_theta_dataP))
         print("Mean of line dataP: ", mean(clean_theta_dataP))
         print("Count of line dataP: ", len(clean_theta_dataP))
-    graphTheta(theta_dataP)
+    #graphTheta(theta_dataP)
     
     cv.waitKey()
     return 0
