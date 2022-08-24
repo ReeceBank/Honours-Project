@@ -3,6 +3,7 @@ import math
 import cv2 as cv
 
 draw_colour = (0,0,255) # bgr in opencv
+central_colour = (255,0,0) # central point colour
 line_thickness = 1
 
 version_name = "Linedrawer"
@@ -26,6 +27,8 @@ def drawlines(image, line_list):
 
 def drawlinesp(image, probabilistic_line_list):
     #draws the lines of the probabilistic lines onto the processed image
+    #data appears to be given by open cv mirrored and with respect to the horizontal (0)
+    #or not mirrored and with respect to the -horizontal (180)
     if probabilistic_line_list is not None:
         for i in range(0, len(probabilistic_line_list)):
             l = probabilistic_line_list[i][0]
@@ -34,11 +37,18 @@ def drawlinesp(image, probabilistic_line_list):
     cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", image)
     return image
 
+def drawlinesCentre(image, central_point):
+    #draws a 10x10 marker on the found central point of the image
+    cv.line(image, ((int(central_point[0])+5), int(central_point[1])), ((int(central_point[0])-5), int(central_point[1])), central_colour, line_thickness+1, cv.LINE_AA)
+    cv.line(image, (int(central_point[0]), (int(central_point[1])+5)), (int(central_point[0]), (int(central_point[1])-5)), central_colour, line_thickness+1, cv.LINE_AA)
+    return image
+
+
 def importtest():
     return version_name
 
 def main():
-    print("Running Linedrawer Directly")
+    print("Running", version_name)
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,7 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 from statistics import stdev, mean
-from linedrawer import drawlines, drawlinesp
+from linedrawer import drawlines, drawlinesp, drawlinesCentre
 
 #required installs:
 #pip install opencv-python
@@ -38,7 +38,7 @@ from linedrawer import drawlines, drawlinesp
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/window.png' #test image
+default_file = 'sourceimages/bad.png' #test image
 
 
 
@@ -182,7 +182,7 @@ def getThetaDataP(linesP):
             y1 = l[1] 
             x2 = l[2] 
             y2 = l[3]
-            thetap = (y1 - y2) / (x1 - x2)
+            thetap = (y2 - y1) / (x2 - x1)
             theta_datap.append(thetap)
 
     theta_datap = np.arctan(theta_datap)
@@ -245,7 +245,10 @@ def findCentrePoints(linesP):
             center_points.append(centre)
 
     #the overall central point of all centre points
-    central_point = (sum(xcentres_list)/len(xcentres_list),sum(ycentres_list)/len(ycentres_list))
+    if(len(xcentres_list)>=1):
+        central_point = (sum(xcentres_list)/len(xcentres_list),sum(ycentres_list)/len(ycentres_list))
+    else:
+        central_point = (-1,-1)
 
     return center_points, central_point
 
@@ -255,7 +258,7 @@ def main():
     src = cv.imread(cv.samples.findFile(default_file))
     histo = histogramEqualization(src)
     prek = colourQuantize(histo)
-    kmean_image = kmeans(prek)
+    kmean_image = kmeans(histo)
     
     #output canny (not good)
     #easy placeholder until morphological pruning
@@ -273,6 +276,13 @@ def main():
     linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
     drawlinesp(cdstP,linesP)
 
+    
+    # gets the centre point of the data
+    centre_points, central_point = findCentrePoints(linesP)
+    print("Centre of the lines: ", central_point)
+
+    cdstP = drawlinesCentre(cdstP, central_point)
+
     cv.imshow("Original Source", src)
     cv.imshow("Cannied", dst)
     cv.imshow("Histogramed", histo)
@@ -282,10 +292,6 @@ def main():
     # looking at some stats
     theta_data = getThetaData(lines)
     theta_dataP = getThetaDataP(linesP)
-
-    # gets the centre point of the data
-    centre_points, central_point = findCentrePoints(linesP)
-    print("Centre of the lines: ", central_point)
 
     clean_theta_data = cleanINFdata(theta_data)
     clean_theta_dataP = cleanINFdata(theta_dataP)
