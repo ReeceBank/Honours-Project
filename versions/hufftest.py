@@ -38,7 +38,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/bad.png' #test image
+default_file = 'sourceimages/window3.png' #test image
 
 
 
@@ -58,12 +58,12 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 3 # Choosing number of cluster
+    k = 4 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
     centers = np.uint8(centers) # convert data into 8-bit values 
-    print("centres: ",centers)
+    #print("centres: ",centers)
     segmented_data = centers[labels.flatten()] # Mapping labels to center points( RGB Value)
     segmented_image = segmented_data.reshape((image.shape)) # reshape data into the original image dimensions
     #quick check to see the minmax of the kmeans (probably an easier way using)
@@ -73,10 +73,10 @@ def kmeans(input_image):
         for i in range(len(segmented_image[0])):
             if (segmented_image[n][i][0] > max):
                 max = segmented_image[n][i][0]
-                print("new max found", max)
+                #print("new max found", max)
             elif (segmented_image[n][i][0] < min):
                 min = segmented_image[n][i][0]
-                print("new min found", min)
+                #print("new min found", min)
     
     for n in range(len(segmented_image)):
         for i in range(len(segmented_image[0])):
@@ -244,21 +244,42 @@ def findCentrePoints(linesP):
 
             center_points.append(centre)
 
-    #the overall central point of all centre points
+    #the overall central cluster point of all centre points
     if(len(xcentres_list)>=1):
         central_point = (sum(xcentres_list)/len(xcentres_list),sum(ycentres_list)/len(ycentres_list))
     else:
         central_point = (-1,-1)
 
+    #returns the list of line centres and the central cluster point of all lines
     return center_points, central_point
 
+def findCentreDistance(width,height,central_point):
+    image_central_point = (width/2,height/2)
+    distance = math.dist(image_central_point,central_point)
+
+    return distance
+
+def findCentralAccuracy(width,height,central_point):
+    #a percentage mesure of how close the cluster centre is to the centre of the image
+    #with 100% being dead centre and 0% being completely off image.
+    image_width = width/2
+    image_height = height/2
+    central_width = central_point[0]
+    central_height = central_point[1]
+    xoffset = 1 - (math.dist([image_width],[central_width])/image_width)
+    xoffset_percentage = xoffset*100
+    yoffset = 1 - (math.dist([image_height],[central_height])/image_height)
+    yoffset_percentage = yoffset*100
+
+    accuracy_percentage = (xoffset_percentage+yoffset_percentage)/2
+    return accuracy_percentage
 
 def main():
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
     histo = histogramEqualization(src)
     prek = colourQuantize(histo)
-    kmean_image = kmeans(histo)
+    kmean_image = kmeans(prek)
     
     #output canny (not good)
     #easy placeholder until morphological pruning
@@ -273,13 +294,22 @@ def main():
     drawlines(cdst,lines)
     
     #draw lines on image - probabalistic
-    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
+    #orignally 50/10
+    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 80, 9)
     drawlinesp(cdstP,linesP)
 
     
     # gets the centre point of the data
     centre_points, central_point = findCentrePoints(linesP)
     print("Centre of the lines: ", central_point)
+    image_height = len(src)
+    image_width = len(src[0])
+    print("Image Height: ", image_height)
+    print("Image Width: ", image_width)
+    distance = findCentreDistance(image_width, image_height, central_point)
+    print("Distance from Centre to Central: ", distance)
+    accuracy = findCentralAccuracy(image_width, image_height, central_point)
+    print("Accuracy of Central: ", accuracy)
 
     cdstP = drawlinesCentre(cdstP, central_point)
 
