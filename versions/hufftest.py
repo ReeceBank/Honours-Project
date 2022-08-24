@@ -38,7 +38,7 @@ from linedrawer import drawlines, drawlinesp
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/full.png' #test image
+default_file = 'sourceimages/window.png' #test image
 
 
 
@@ -58,7 +58,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 5 # Choosing number of cluster
+    k = 3 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -219,6 +219,37 @@ def cleanINFdata(data):
     #         data[i] = -100
     return data
 
+def findCentrePoints(linesP):
+    #finds the centre points of the probablistic hough transform lines
+    #very useful to determin anomolous images as the further from the centre of the image the cetral point is then the more likely its anomalous
+
+    #a list (of tuples) of center point coordinates
+    center_points = []
+    xcentres_list = []
+    ycentres_list = []
+    if linesP is not None:
+        for i in range(0, len(linesP)):
+            l = linesP[i][0]
+            x1 = l[0] 
+            y1 = l[1] 
+            x2 = l[2] 
+            y2 = l[3]
+
+            xcentre = (x1+x2)/2
+            xcentres_list.append(xcentre)
+
+            ycentre = (y1+y2)/2
+            ycentres_list.append(ycentre)
+            centre = (xcentre,ycentre)
+
+            center_points.append(centre)
+
+    #the overall central point of all centre points
+    central_point = (sum(xcentres_list)/len(xcentres_list),sum(ycentres_list)/len(ycentres_list))
+
+    return center_points, central_point
+
+
 def main():
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
@@ -251,6 +282,10 @@ def main():
     # looking at some stats
     theta_data = getThetaData(lines)
     theta_dataP = getThetaDataP(linesP)
+
+    # gets the centre point of the data
+    centre_points, central_point = findCentrePoints(linesP)
+    print("Centre of the lines: ", central_point)
 
     clean_theta_data = cleanINFdata(theta_data)
     clean_theta_dataP = cleanINFdata(theta_dataP)
