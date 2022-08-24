@@ -1,1 +1,1 @@
-kmean_image
+image_width

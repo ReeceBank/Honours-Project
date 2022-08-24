@@ -38,7 +38,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/window3.png' #test image
+default_file = 'sourceimages/real2.png' #test image
 
 
 
@@ -58,7 +58,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 4 # Choosing number of cluster
+    k = 2 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -182,11 +182,21 @@ def getThetaDataP(linesP):
             y1 = l[1] 
             x2 = l[2] 
             y2 = l[3]
-            thetap = (y2 - y1) / (x2 - x1)
+            if (x2 - x1) == 0:
+                thetap = math.inf
+            else:
+                thetap = (y2 - y1) / (x2 - x1)
+
+            if thetap > -90 and thetap < 0 :# ------------ LATE NIGHT: MOVE TO DEGREES PART -------------
+                print("X and Ys: ", y2, y1, x2, x1, " ", end="")
+                print(thetap)
+                thetap = thetap+180
+
             theta_datap.append(thetap)
 
     theta_datap = np.arctan(theta_datap)
     theta_datap = np.degrees(theta_datap)
+    print(theta_datap)
 
     return theta_datap
 
@@ -295,7 +305,7 @@ def main():
     
     #draw lines on image - probabalistic
     #orignally 50/10
-    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 80, 9)
+    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 9)
     drawlinesp(cdstP,linesP)
 
     
@@ -309,7 +319,7 @@ def main():
     distance = findCentreDistance(image_width, image_height, central_point)
     print("Distance from Centre to Central: ", distance)
     accuracy = findCentralAccuracy(image_width, image_height, central_point)
-    print("Accuracy of Central: ", accuracy)
+    print("Accuracy of Central: ", str(int(accuracy))+str('%'))
 
     cdstP = drawlinesCentre(cdstP, central_point)
 
