@@ -258,7 +258,7 @@ def findCentrePoints(linesP):
     else:
         central_point = (-1,-1)
 
-    #returns the list of line centres and the central cluster point of all lines
+    #returns the list of centres and the central cluster point of all lines
     return center_points, central_point
 
 def findCentreDistance(width,height,central_point):
@@ -336,7 +336,7 @@ def main():
 
     #print("Line data: ", clean_theta_data)
     if len(clean_theta_data) >= 2:
-        print("Standdev of line data: ", stdev(clean_theta_data))
+        print("Standdev of line data: ", circstd(clean_theta_data))
         print("Mean of line data: ", mean(clean_theta_data))
         print("Count of line data: ", len(clean_theta_data))
     #print("Line dataP: ", clean_theta_dataP)
