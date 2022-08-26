@@ -3,20 +3,21 @@ import math
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import circstd
+#modules
 from statistics import stdev, mean
 from linedrawer import drawlines, drawlinesp, drawlinesCentre
 
 #required installs:
 #pip install opencv-python
 #pip install matplotlib
+#pip install scipy
 
 #skeleton code to help generate hough lines while i work on the:
-#k means binarization
 #Morphological Closing
 #Morphological Erosion
 #Morphological Skeleton 
 #Morphological Pruning
-#Final Hough Transforms
 
 #obersvations:
 #v0.3 has issues because of cannying the kmeans
@@ -38,7 +39,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/real2.png' #test image
+default_file = 'sourceimages/window2.png' #test image
 
 
 
@@ -182,21 +183,18 @@ def getThetaDataP(linesP):
             y1 = l[1] 
             x2 = l[2] 
             y2 = l[3]
+            #remove division by zero issue
             if (x2 - x1) == 0:
                 thetap = math.inf
             else:
                 thetap = (y2 - y1) / (x2 - x1)
-
-            if thetap > -90 and thetap < 0 :# ------------ LATE NIGHT: MOVE TO DEGREES PART -------------
-                print("X and Ys: ", y2, y1, x2, x1, " ", end="")
-                print(thetap)
-                thetap = thetap+180
-
+            
             theta_datap.append(thetap)
 
     theta_datap = np.arctan(theta_datap)
     theta_datap = np.degrees(theta_datap)
-    print(theta_datap)
+    #to see all degree values
+    #print(theta_datap)
 
     return theta_datap
 
@@ -343,7 +341,7 @@ def main():
         print("Count of line data: ", len(clean_theta_data))
     #print("Line dataP: ", clean_theta_dataP)
     if len(clean_theta_dataP) >= 2:
-        print("Standdev of line dataP: ", stdev(clean_theta_dataP))
+        print("Standdev of line dataP: ", circstd(clean_theta_dataP))
         print("Mean of line dataP: ", mean(clean_theta_dataP))
         print("Count of line dataP: ", len(clean_theta_dataP))
     #graphTheta(theta_dataP)
