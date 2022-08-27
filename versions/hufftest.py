@@ -3,7 +3,7 @@ import math
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import circstd
+from scipy.stats import circstd, circmean
 #modules
 from statistics import stdev, mean
 from linedrawer import drawlines, drawlinesp, drawlinesCentre
@@ -25,6 +25,17 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #with quantization this doesnt occur, k of 12+ still generates WORKING IMAGES, HAZA! i guess.
 #the ideal image would always be at 45 degrees. anomalous images have high stdev (0.7) and clean have low (0.08)
 
+    #notes on closing: with window.png, 1 iteration, 5x5 rect
+    # Standard Lines
+    # stdev from 0 to 0 (lol)
+    # mean from 72.25 to 72.25 (expected)
+    # linecount from 19 to 22 (amazing!)
+    # Probablistic Lines
+    # stdev from 0.5508 to 0.5334 (better)
+    # mean from 86.624 to 88.911 (better)
+    # linecount from 75 to 64 (argubly worse?)
+
+
 #default_file = 'sourceimages/window.png' #example with good, but is a png so cant use
 
 #default_file = 'sourceimages/bad2-45.png' #example with high standard deviation = bad ( high stdev )
@@ -39,7 +50,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/window2.png' #test image
+default_file = 'sourceimages/window3.png' #test image
 
 
 
@@ -59,7 +70,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 2 # Choosing number of cluster
+    k = 3 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -67,7 +78,10 @@ def kmeans(input_image):
     #print("centres: ",centers)
     segmented_data = centers[labels.flatten()] # Mapping labels to center points( RGB Value)
     segmented_image = segmented_data.reshape((image.shape)) # reshape data into the original image dimensions
+    
+    print("Kmeans Complete")
     #quick check to see the minmax of the kmeans (probably an easier way using)
+    print("Binerization")
     min = 999
     max = -1
     for n in range(len(segmented_image)):
@@ -85,12 +99,14 @@ def kmeans(input_image):
                 segmented_image[n][i] = [0,0,0] #the not rows
             elif (segmented_image[n][i][0] <= min):
                 segmented_image[n][i] = [255,255,255] #the rows (painting them white)
+    print("Binerization Complete")
     
     cv.imshow("Kmeans extraction", segmented_image)
 
-    segmented_image = cv.cvtColor(segmented_image, cv.COLOR_BGR2GRAY) # Change color to RGB (from BGR)
+    segmented_image = cv.cvtColor(segmented_image, cv.COLOR_BGR2GRAY) # Change color to RGB (from BGR) should mess with more options to see results
     #print("Segmented image: ",segmented_image)
     # ------------------ kmeans
+    print("Kmeans-Binerization Complete")
     return segmented_image #the kmeans image
 
 def histogramEqualization(input_image):
@@ -288,23 +304,80 @@ def main():
     histo = histogramEqualization(src)
     prek = colourQuantize(histo)
     kmean_image = kmeans(prek)
+
+
+    # --------- MORPHOLOGICAL EXPERIMENT ----------
+    kernel = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
+    opening = cv.morphologyEx(kmean_image, cv.MORPH_OPEN, kernel, iterations=1)
+    cv.imshow("Opening", opening)
+
+    kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
+    closing = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel, iterations=1) #closing = dilate and then erode
+    cv.imshow("Closing", closing)
+
+    kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    opening2 = cv.morphologyEx(closing, cv.MORPH_OPEN, kernel, iterations=1)
+    cv.imshow("Opening2", opening2)
+
+    kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
+    closing2 = cv.morphologyEx(opening2, cv.MORPH_CLOSE, kernel, iterations=1) #closing = dilate and then erode
+    cv.imshow("Closing2", closing2)
+    
+    kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    erosion = cv.morphologyEx(closing2, cv.MORPH_ERODE, kernel, iterations=1)
+    cv.imshow("Erosion", erosion)
+
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    #opening3 = cv.morphologyEx(erosion, cv.MORPH_OPEN, kernel, iterations=1)
+    #cv.imshow("Opening3", opening3)
+
+    # --------- SKELETONIZATION EXPERIMENT ----------
+    ret,img = cv.threshold(erosion, 127, 255, 0)
+
+    # Step 1: Create an empty skeleton
+    size = np.size(img)
+    skel = np.zeros(erosion.shape, np.uint8)
+
+    # Get a Cross Shaped Kernel
+    element = cv.getStructuringElement(cv.MORPH_CROSS, (3,3))
+    # Repeat steps 2-4
+    while True:
+        #Step 2: Open the image
+        open = cv.morphologyEx(erosion, cv.MORPH_OPEN, element)
+        #Step 3: Substract open from the original image
+        temp = cv.subtract(erosion, open)
+        #Step 4: Erode the original image and refine the skeleton
+        eroded = cv.erode(erosion, element)
+        skel = cv.bitwise_or(skel,temp)
+        erosion = eroded.copy()
+        # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
+        if cv.countNonZero(erosion)==0:
+            break
+
+    cv.imshow("Skeleton", skel)
+
+    kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    closeing3 = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernel, iterations=3)
+    cv.imshow("Prune", closeing3)
+
     
     #output canny (not good)
     #easy placeholder until morphological pruning
-    dst = cv.Canny(kmean_image, 20, 100, None, 3)
+    dst = cv.Canny(closeing3, 20, 100, None, 3)
+
 
     # Copy edges to the images that will display the results in BGR
-    cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
+    cdst = cv.cvtColor(closeing3, cv.COLOR_GRAY2BGR)
     cdstP = np.copy(cdst)
 
     #draw lines on image - non probabalistic
-    lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
-    drawlines(cdst,lines)
+    lines = cv.HoughLines(closeing3, 1, np.pi / 180, 150, None, 0, 0)
+    drawlines(src,lines)
     
     #draw lines on image - probabalistic
     #orignally 50/10
-    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 9)
-    drawlinesp(cdstP,linesP)
+    linesP = cv.HoughLinesP(closeing3, 1, np.pi / 180, 50, None, 50, 15)
+    drawlinesp(src,linesP)
 
     
     # gets the centre point of the data
@@ -337,12 +410,12 @@ def main():
     #print("Line data: ", clean_theta_data)
     if len(clean_theta_data) >= 2:
         print("Standdev of line data: ", circstd(clean_theta_data))
-        print("Mean of line data: ", mean(clean_theta_data))
+        print("Mean of line data: ", circmean(clean_theta_data))
         print("Count of line data: ", len(clean_theta_data))
     #print("Line dataP: ", clean_theta_dataP)
     if len(clean_theta_dataP) >= 2:
         print("Standdev of line dataP: ", circstd(clean_theta_dataP))
-        print("Mean of line dataP: ", mean(clean_theta_dataP))
+        print("Mean of line dataP: ", circmean(clean_theta_dataP))
         print("Count of line dataP: ", len(clean_theta_dataP))
     #graphTheta(theta_dataP)
     
