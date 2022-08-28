@@ -50,7 +50,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/window3.png' #test image
+default_file = 'sourceimages/small.png' #test image
 
 
 
@@ -357,26 +357,26 @@ def main():
     cv.imshow("Skeleton", skel)
 
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    closeing3 = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernel, iterations=3)
-    cv.imshow("Prune", closeing3)
+    prune = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernel, iterations=3)
+    cv.imshow("Prune", prune)
 
     
     #output canny (not good)
     #easy placeholder until morphological pruning
-    dst = cv.Canny(closeing3, 20, 100, None, 3)
+    dst = cv.Canny(prune, 20, 100, None, 3)
 
 
     # Copy edges to the images that will display the results in BGR
-    cdst = cv.cvtColor(closeing3, cv.COLOR_GRAY2BGR)
+    cdst = cv.cvtColor(prune, cv.COLOR_GRAY2BGR)
     cdstP = np.copy(cdst)
 
     #draw lines on image - non probabalistic
-    lines = cv.HoughLines(closeing3, 1, np.pi / 180, 150, None, 0, 0)
+    lines = cv.HoughLines(prune, 1, np.pi / 180, 150, None, 0, 0)
     drawlines(src,lines)
     
     #draw lines on image - probabalistic
     #orignally 50/10
-    linesP = cv.HoughLinesP(closeing3, 1, np.pi / 180, 50, None, 50, 15)
+    linesP = cv.HoughLinesP(prune, 1, np.pi / 180, 50, None, 50, 15)
     drawlinesp(src,linesP)
 
     
