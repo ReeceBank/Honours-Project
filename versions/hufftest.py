@@ -3,6 +3,7 @@ import math
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 #external libraries functions
 from scipy.stats import circstd, circmean
 from skimage.morphology import disk, diamond
@@ -54,7 +55,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/bad4.png' #test image
+default_file = 'sourceimages/window4.png' #test image
 
 
 
@@ -175,6 +176,7 @@ def colourQuantize(input_image):
     print("Colour Quantization Complete")
     return quantized_image
 
+#extracting data functions
 def getThetaData(lines):
     #give a lines list from opencv to get a list of slope values
     #for standard hough lines
@@ -218,6 +220,7 @@ def getThetaDataP(linesP):
 
     return theta_datap
 
+#graphing - reduntant
 def graphTheta(theta_data):
     #creates a simple line graph of slope values
     theta_data.sort()
@@ -238,6 +241,7 @@ def graphTheta(theta_data):
 
     return 0
 
+#redundant
 def cleanINFdata(data):
     #simple fix to inf data when determining slope
     # for i in range(len(data)):
@@ -247,6 +251,7 @@ def cleanINFdata(data):
     #         data[i] = -100
     return data
 
+#central point functions
 def findCentrePoints(linesP):
     #finds the centre points of the probablistic hough transform lines
     #very useful to determin anomolous images as the further from the centre of the image the cetral point is then the more likely its anomalous
@@ -302,6 +307,7 @@ def findCentralAccuracy(width,height,central_point):
     accuracy_percentage = (xoffset_percentage+yoffset_percentage)/2
     return accuracy_percentage
 
+#morphologyex functions
 def MorphSkeleton():
     return 0
 
@@ -312,13 +318,45 @@ def MorphOpenClose():
 def MorphPrune():
     return 0 
 
+# Anomaly Functions
 def AnomalyDecide(accuracy, line_data, line_datap):
+    #rework after data collection complete
     accuracy_decision = ""
     if accuracy < 80:
         accuracy_decision = "medium"
 
+    return 0
 
+def AnomalyDataCollection( image_name, image_height, image_width, accuracy, line_data, line_datap):
+    f = open("Data.txt", "a")
 
+    f.write(str(image_name)+" ")
+    f.write(str(image_height)+" ")
+    f.write(str(image_width)+" ")
+    f.write(str(round(accuracy,2))+" ")
+
+    if len(line_data) >= 1:
+        f.write(str(round(circstd(line_data),2))+" ")
+        #f.write(str(round(circmean(line_data),2))+" ")
+        f.write(str(len(line_data))+" ")
+
+    else: #if no linedata is present (bad anomaly)
+        f.write("-1"+" ")
+        #f.write("-1"+" ")
+        f.write("-1"+" ")
+
+    if len(line_datap) >= 1:
+        f.write(str(round(circstd(line_datap),2))+" ")
+        #f.write(str(round(circmean(line_datap),2))+" ")
+        f.write(str(len(line_datap))+" ")
+
+    else: #if no linedata is present (bad anomaly)
+        f.write("-1"+" ")
+        #f.write("-1"+" ")
+        f.write("-1"+" ")
+
+    f.write("\n")
+    f.close()
     return 0
 
 def main():
@@ -462,20 +500,36 @@ def main():
         print("Count of line dataP: ", len(clean_theta_dataP))
     #graphTheta(theta_dataP)
 
-    anomaly_decision, reason_decision = AnomalyDecide(accuracy, clean_theta_data, clean_theta_dataP)
+    AnomalyDataCollection(default_file, image_height, image_width, accuracy, clean_theta_data, clean_theta_dataP)
+
+    # ----------------- PH PH PH -----------------
+    #anomaly_decision, reason_decision = AnomalyDecide(accuracy, clean_theta_data, clean_theta_dataP)
     
     cv.waitKey()
-    return 0
-    
-def simpletest():
-    test_image = histogramEqualization(default_file)
-    #cv.imshow("output", test_image)
-    #src = cv.imread(cv.samples.findFile(default_file))
-    #cv.imshow("input", src)
-    #cv.waitKey()
     return 0
 
 
 if __name__ == "__main__":
     #simpletest()
-    main()
+    print("--- Starting ---")
+
+    f = open("Data.txt","w")
+    #simple header
+    f.write("image_name, frame height, frame width, central accuracy, standard stdev/count, probablistic stdev/count\n")
+    f.close()
+
+    print("--- Finding Files ---")
+    files_to_run = []
+    path = "sourceimages/"
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            if name.endswith(".png"):
+                files_to_run.append(name)
+    
+    print("--- Files Found ---")
+
+    for i in range(len(files_to_run)):
+        default_file = "sourceimages/"+str(files_to_run[i])
+        main()
+        
+    print("--- Finished ---")
