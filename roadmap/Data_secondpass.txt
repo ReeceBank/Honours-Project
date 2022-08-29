@@ -1,6 +1,6 @@
-overall accuracy = 84% (across 19 different .tifs, 25 total windows)
+overall accuracy = 84% (21/25 passed)
 
-critical failures = 0 (classified a bad image as good)
+unacceptable failures = 0 (classified a bad image as good)
 acceptable failures = 3 (calssified a good image as bad)
 
 data:
@@ -15,7 +15,7 @@ sourceimages/bad3-1.png 200 200 57.5 -1 -1 -0.0 1 passed
 sourceimages/bad3-2.png 200 200 68.72 0.05 5 0.66 8 passed 
 sourceimages/bad4-2.png 200 200 71.25 -1 -1 0.0 1 passed
 sourceimages/bad4.png 200 200 59.7 -0.0 1 0.91 10 passed
-sourceimages/bad5.png 200 200 98.38 0.36 6 0.32 20 failed (very small hole in data, didnt detect, hole makes up ~4% of image)
+sourceimages/bad5.png 200 200 98.38 0.36 6 0.32 20 failed (very small hole in data, didnt detect, hole makes up ~4% of image. Easy quick fix is to just check for clusters with transperancy)
 sourceimages/bad6.png 150 150 88.81 -1 -1 1.15 9 passed
 sourceimages/bad7.png 200 200 -1.0 -1 -1 -1 -1 passed
 sourceimages/bad8.png 200 200 61.0 0.0 1 1.13 2 passed
@@ -23,10 +23,10 @@ sourceimages/bad9-2.png 200 200 -1.0 -1 -1 -1 -1 passed
 sourceimages/bad9.png 200 200 -1.0 -1 -1 -1 -1 passed
 sourceimages/window1.png 200 200 91.33 0.04 6 0.74 13 passed
 sourceimages/window2.png 418 282 91.3 0.05 18 0.3 33 passed
-sourceimages/window3.png 384 602 96.11 0.22 22 0.64 41 passed
+sourceimages/window3.png 400 600 96.11 0.22 22 0.64 41 passed
 sourceimages/window4.png 200 200 94.76 0.43 8 0.36 24 passed
 sourceimages/window5.png 200 200 86.55 0.5 2 0.4 19 passed 
-sourceimages/window6.png 150 150 87.63 -1 -1 0.48 9 passed (barely)
+sourceimages/window6.png 150 150 87.63 -1 -1 0.48 9 passed (barely passed. has the lowest hough line count out of all non-anomalous images. may be due to kmeans)
 sourceimages/window7.png 200 200 93.0 -1 -1 0.66 13 passed
 
 special cases:
