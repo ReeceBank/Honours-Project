@@ -4,7 +4,7 @@ import cv2 as cv
 
 draw_colour = (0,0,255) # bgr in opencv
 central_colour = (255,0,0) # central point colour
-line_thickness = 1
+line_thickness = 2
 
 version_name = "Linedrawer"
 

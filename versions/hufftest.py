@@ -3,15 +3,19 @@ import math
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+#external libraries functions
 from scipy.stats import circstd, circmean
+from skimage.morphology import disk, diamond
 #modules
 from statistics import stdev, mean
 from linedrawer import drawlines, drawlinesp, drawlinesCentre
 
+
 #required installs:
-#pip install opencv-python
-#pip install matplotlib
-#pip install scipy
+#pip install opencv-python #core
+#pip install matplotlib #graphing
+#pip install scipy #stats for stdev
+#pip install scikit-image #disk elements
 
 #skeleton code to help generate hough lines while i work on the:
 #Morphological Closing
@@ -50,7 +54,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/small.png' #test image
+default_file = 'sourceimages/bad6.png' #test image
 
 
 
@@ -70,7 +74,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 3 # Choosing number of cluster
+    k = 2 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -298,6 +302,16 @@ def findCentralAccuracy(width,height,central_point):
     accuracy_percentage = (xoffset_percentage+yoffset_percentage)/2
     return accuracy_percentage
 
+def MorphSkeleton():
+    return 0
+
+    
+def MorphOpenClose():
+    return 0
+
+def MorphPrune():
+    return 0 
+
 def main():
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
@@ -307,35 +321,46 @@ def main():
 
 
     # --------- MORPHOLOGICAL EXPERIMENT ----------
-    kernel = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
-    opening = cv.morphologyEx(kmean_image, cv.MORPH_OPEN, kernel, iterations=1)
+    kernelrect = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
+    #print("Rect:","\n", kernelrect)
+    kerneldisk = disk(1)
+    #print("Disk:","\n", kerneldisk)
+    kernelcros = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
+    #print("Cross:","\n", kernelcros)
+    kerneldiam = diamond(2)
+    #print("Diamond:","\n", kerneldiam)
+
+    #kernel = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
+    opening = cv.morphologyEx(kmean_image, cv.MORPH_OPEN, kerneldisk, iterations=1)
     cv.imshow("Opening", opening)
 
-    kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
-    closing = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel, iterations=1) #closing = dilate and then erode
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
+    closing = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernelrect, iterations=1) #closing = dilate and then erode
     cv.imshow("Closing", closing)
 
-    kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    opening2 = cv.morphologyEx(closing, cv.MORPH_OPEN, kernel, iterations=1)
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    opening2 = cv.morphologyEx(closing, cv.MORPH_OPEN, kerneldisk, iterations=1)
     cv.imshow("Opening2", opening2)
 
-    kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
-    closing2 = cv.morphologyEx(opening2, cv.MORPH_CLOSE, kernel, iterations=1) #closing = dilate and then erode
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
+    closing2 = cv.morphologyEx(opening2, cv.MORPH_CLOSE, kernelrect, iterations=1) #closing = dilate and then erode
     cv.imshow("Closing2", closing2)
     
-    kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    erosion = cv.morphologyEx(closing2, cv.MORPH_ERODE, kernel, iterations=1)
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    erosion = cv.morphologyEx(closing2, cv.MORPH_ERODE, kernelrect, iterations=1)
     cv.imshow("Erosion", erosion)
+
+    erosion = closing2
 
     #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
     #opening3 = cv.morphologyEx(erosion, cv.MORPH_OPEN, kernel, iterations=1)
     #cv.imshow("Opening3", opening3)
 
     # --------- SKELETONIZATION EXPERIMENT ----------
-    ret,img = cv.threshold(erosion, 127, 255, 0)
+    #ret,img = cv.threshold(erosion, 127, 255, 0)
 
     # Step 1: Create an empty skeleton
-    size = np.size(img)
+    #size = np.size(img)
     skel = np.zeros(erosion.shape, np.uint8)
 
     # Get a Cross Shaped Kernel
@@ -356,8 +381,11 @@ def main():
 
     cv.imshow("Skeleton", skel)
 
-    kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    prune = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernel, iterations=3)
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
+    prune = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernelrect, iterations=2)
+    
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
+    #prune = cv.morphologyEx(prune, cv.MORPH_ERODE, kernel, iterations=1)
     cv.imshow("Prune", prune)
 
     
@@ -371,12 +399,16 @@ def main():
     cdstP = np.copy(cdst)
 
     #draw lines on image - non probabalistic
-    lines = cv.HoughLines(prune, 1, np.pi / 180, 150, None, 0, 0)
+    #accumulator min dependent on image
+    # testing found with big spaced trees = 150, smaller 200x200 windows = 50
+    lines = cv.HoughLines(prune, 1, np.pi / 180, 100, None, 0, 0)
+    drawlines(cdst,lines)
     drawlines(src,lines)
     
     #draw lines on image - probabalistic
     #orignally 50/10
-    linesP = cv.HoughLinesP(prune, 1, np.pi / 180, 50, None, 50, 15)
+    linesP = cv.HoughLinesP(skel, 1, np.pi / 180, 50, None, 50, 15)
+    drawlinesp(cdstP,linesP)
     drawlinesp(src,linesP)
 
     
