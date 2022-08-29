@@ -54,7 +54,7 @@ from linedrawer import drawlines, drawlinesp, drawlinesCentre
 #default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
 #default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
 
-default_file = 'sourceimages/bad6.png' #test image
+default_file = 'sourceimages/bad4.png' #test image
 
 
 
@@ -74,7 +74,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 2 # Choosing number of cluster
+    k = 3 # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -312,6 +312,15 @@ def MorphOpenClose():
 def MorphPrune():
     return 0 
 
+def AnomalyDecide(accuracy, line_data, line_datap):
+    accuracy_decision = ""
+    if accuracy < 80:
+        accuracy_decision = "medium"
+
+
+
+    return 0
+
 def main():
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
@@ -329,6 +338,8 @@ def main():
     #print("Cross:","\n", kernelcros)
     kerneldiam = diamond(2)
     #print("Diamond:","\n", kerneldiam)
+    kernelline = cv.getStructuringElement(cv.MORPH_RECT, (4, 1))
+    #print("Line:","\n", kernelline)
 
     #kernel = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
     opening = cv.morphologyEx(kmean_image, cv.MORPH_OPEN, kerneldisk, iterations=1)
@@ -382,7 +393,7 @@ def main():
     cv.imshow("Skeleton", skel)
 
     #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
-    prune = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernelrect, iterations=2)
+    prune = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernelline, iterations=2)
     
     #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
     #prune = cv.morphologyEx(prune, cv.MORPH_ERODE, kernel, iterations=1)
@@ -450,6 +461,8 @@ def main():
         print("Mean of line dataP: ", circmean(clean_theta_dataP))
         print("Count of line dataP: ", len(clean_theta_dataP))
     #graphTheta(theta_dataP)
+
+    anomaly_decision, reason_decision = AnomalyDecide(accuracy, clean_theta_data, clean_theta_dataP)
     
     cv.waitKey()
     return 0
