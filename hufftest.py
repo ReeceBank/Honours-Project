@@ -18,12 +18,6 @@ from versions.linedrawer import drawlines, drawlinesp, drawlinesCentre
 #pip install scipy #stats for stdev
 #pip install scikit-image #disk elements
 
-#skeleton code to help generate hough lines while i work on the:
-#Morphological Closing
-#Morphological Erosion
-#Morphological Skeleton 
-#Morphological Pruning
-
 #obersvations:
 #v0.3 has issues because of cannying the kmeans
 #when no quantization: kmeans 6 and above causes issues (no images, too much removed etc)
