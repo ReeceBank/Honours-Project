@@ -1,0 +1,27 @@
+image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision
+sourceimages/bad1-1.png 200 200 87.67 0 0 1.59 3 Anomalous Failed_2_tests 
+sourceimages/bad1.png 200 200 97.55 -0.0 3 0.27 10 Nonanomalous Failed_0_tests 
+sourceimages/bad10-2.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad10-3.png 200 200 66.85 0 0 0.83 5 Anomalous Failed_1_tests 
+sourceimages/bad10.png 200 200 77.08 1.48 3 1.55 3 Anomalous Failed_3_tests 
+sourceimages/bad2-1.png 200 200 77.62 0 0 0.52 2 Anomalous Failed_2_tests 
+sourceimages/bad3-1.png 200 200 96.25 0 0 1.35 6 Anomalous Failed_1_tests 
+sourceimages/bad3-2.png 200 200 73.64 0.05 6 0.62 11 Anomalous Failed_1_tests 
+sourceimages/bad4-2.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad4.png 200 200 62.75 0 0 0.52 3 Anomalous Failed_2_tests 
+sourceimages/bad5.png 200 200 87.41 0.0 7 0.76 19 Nonanomalous Failed_0_tests 
+sourceimages/bad6.png 150 150 95.56 -0.0 1 1.32 15 Anomalous Failed_1_tests 
+sourceimages/bad7.png 200 200 80.42 0 0 1.45 3 Anomalous Failed_2_tests 
+sourceimages/bad8.png 200 200 98.12 -0.0 1 -0.0 2 Anomalous Failed_1_tests 
+sourceimages/bad9-2.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad9.png 200 200 81.5 -0.0 1 0.06 2 Anomalous Failed_1_tests 
+sourceimages/badspecial-1.png 500 500 96.76 0.44 5 1.55 21 Anomalous Failed_1_tests 
+sourceimages/window1.png 200 200 98.71 0.04 13 0.51 14 Nonanomalous Failed_0_tests 
+sourceimages/window2.png 418 282 96.28 0.05 30 0.42 43 Nonanomalous Failed_0_tests 
+sourceimages/window3.png 384 602 87.32 0.52 31 0.97 35 Nonanomalous Failed_0_tests 
+sourceimages/window4.png 200 200 89.7 0.48 11 0.53 28 Nonanomalous Failed_0_tests 
+sourceimages/window5.png 200 200 88.59 0.47 6 0.61 22 Nonanomalous Failed_0_tests 
+sourceimages/window6.png 150 150 95.49 -0.0 2 0.27 13 Nonanomalous Failed_0_tests 
+sourceimages/window7.png 200 200 93.0 0 0 0.66 13 Nonanomalous Failed_0_tests 
+sourceimages/windowspecial-1.png 200 200 42.25 0 0 0.8 2 Anomalous Failed_2_tests 
+22

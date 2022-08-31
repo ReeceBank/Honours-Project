@@ -1,0 +1,27 @@
+image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision
+sourceimages/bad1-1.png 200 200 87.67 0 0 1.59 3 Anomalous Failed_2_tests 
+sourceimages/bad1.png 200 200 69.5 0 0 0.9 3 Anomalous Failed_2_tests 
+sourceimages/bad10-2.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad10-3.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad10.png 200 200 49.75 -0.0 1 -0.0 1 Anomalous Failed_2_tests 
+sourceimages/bad2-1.png 200 200 33.75 0 0 -0.0 1 Anomalous Failed_2_tests 
+sourceimages/bad3-1.png 200 200 57.5 0 0 -0.0 1 Anomalous Failed_2_tests 
+sourceimages/bad3-2.png 200 200 68.72 0.9 6 0.66 8 Anomalous Failed_1_tests 
+sourceimages/bad4-2.png 200 200 71.25 0 0 0.0 1 Anomalous Failed_2_tests 
+sourceimages/bad4.png 200 200 71.85 -0.0 4 0.28 17 Anomalous Failed_1_tests 
+sourceimages/bad5.png 200 200 98.38 0.36 6 0.32 20 Nonanomalous Failed_0_tests 
+sourceimages/bad6.png 150 150 88.81 0 0 1.15 9 Anomalous Failed_1_tests 
+sourceimages/bad7.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad8.png 200 200 61.0 0 0 1.13 2 Anomalous Failed_3_tests 
+sourceimages/bad9-2.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad9.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/badspecial-1.png 500 500 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/window1.png 200 200 91.33 0.04 4 0.74 13 Nonanomalous Failed_0_tests 
+sourceimages/window2.png 418 282 91.3 0.04 17 0.3 33 Nonanomalous Failed_0_tests 
+sourceimages/window3.png 384 602 96.11 0.14 9 0.64 41 Nonanomalous Failed_0_tests 
+sourceimages/window4.png 200 200 94.76 0.43 8 0.36 24 Nonanomalous Failed_0_tests 
+sourceimages/window5.png 200 200 86.55 0.5 2 0.4 19 Nonanomalous Failed_0_tests 
+sourceimages/window6.png 150 150 87.63 0 0 0.48 9 Nonanomalous Failed_0_tests 
+sourceimages/window7.png 200 200 98.46 -0.0 3 0.42 13 Nonanomalous Failed_0_tests 
+sourceimages/windowspecial-1.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+23

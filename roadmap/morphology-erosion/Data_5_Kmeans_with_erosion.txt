@@ -1,0 +1,27 @@
+image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision
+sourceimages/bad1-1.png 200 200 81.5 0 0 -0.0 1 Anomalous Failed_1_tests 
+sourceimages/bad1.png 200 200 67.83 0 0 0.14 3 Anomalous Failed_2_tests 
+sourceimages/bad10-2.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad10-3.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad10.png 200 200 49.75 1.48 3 -0.0 1 Anomalous Failed_2_tests 
+sourceimages/bad2-1.png 200 200 33.75 0 0 -0.0 1 Anomalous Failed_2_tests 
+sourceimages/bad3-1.png 200 200 54.75 0 0 0.0 1 Anomalous Failed_2_tests 
+sourceimages/bad3-2.png 200 200 63.6 0.05 5 0.48 10 Anomalous Failed_1_tests 
+sourceimages/bad4-2.png 200 200 87.5 0 0 -0.0 1 Anomalous Failed_1_tests 
+sourceimages/bad4.png 200 200 64.06 0 0 0.44 8 Anomalous Failed_1_tests 
+sourceimages/bad5.png 200 200 65.21 0 0 0.37 7 Anomalous Failed_1_tests 
+sourceimages/bad6.png 150 150 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad7.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad8.png 200 200 34.5 0.0 1 1.13 2 Anomalous Failed_3_tests 
+sourceimages/bad9-2.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/bad9.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/badspecial-1.png 500 500 0.0 0 0 0 0 Anomalous Failed_3_tests 
+sourceimages/window1.png 200 200 84.72 -0.0 2 0.63 10 Nonanomalous Failed_0_tests 
+sourceimages/window2.png 418 282 83.76 0.04 10 0.49 20 Nonanomalous Failed_0_tests 
+sourceimages/window3.png 384 602 89.24 0.17 18 0.68 22 Nonanomalous Failed_0_tests 
+sourceimages/window4.png 200 200 56.61 -0.0 1 0.36 7 Anomalous Failed_1_tests 
+sourceimages/window5.png 200 200 62.75 -0.0 1 0.26 5 Anomalous Failed_1_tests 
+sourceimages/window6.png 150 150 49.67 0 0 0.09 2 Anomalous Failed_2_tests 
+sourceimages/window7.png 200 200 95.85 -0.0 3 0.46 10 Nonanomalous Failed_0_tests 
+sourceimages/windowspecial-1.png 200 200 0.0 0 0 0 0 Anomalous Failed_3_tests 
+21

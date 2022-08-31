@@ -22,7 +22,7 @@ def drawlines(image, line_list):
             pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a))) #(x2,y2)
             cv.line(image, pt1, pt2, draw_colour, line_thickness, cv.LINE_AA)
     
-    cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", image)
+    #cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", image)
     return image
 
 def drawlinesp(image, probabilistic_line_list):
@@ -34,7 +34,7 @@ def drawlinesp(image, probabilistic_line_list):
             l = probabilistic_line_list[i][0]
             cv.line(image, (l[0], l[1]), (l[2], l[3]), draw_colour, line_thickness, cv.LINE_AA)
 
-    cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", image)
+    #cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", image)
     return image
 
 def drawlinesCentre(image, central_point):

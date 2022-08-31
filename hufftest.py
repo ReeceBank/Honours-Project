@@ -40,26 +40,11 @@ from versions.linedrawer import drawlines, drawlinesp, drawlinesCentre
     # mean from 86.624 to 88.911 (better)
     # linecount from 75 to 64 (argubly worse?)
 
-
-#default_file = 'sourceimages/window.png' #example with good, but is a png so cant use
-
-#default_file = 'sourceimages/bad2-45.png' #example with high standard deviation = bad ( high stdev )
-#default_file = 'sourceimages/bad2.png' #example where being horizontal (or vertical) messes with results. ( low stdev )
-#default_file = 'sourceimages/real2.png' #example of real test thats good ( low stdev )
-
-#default_file = 'sourceimages/real.png' #example of real test thats bad but should be good ( with shadows )
-#default_file = 'sourceimages/window3.png' #example of real test ( horrible spaced trees )
-
-#default_file = 'sourceimages/small.png' #example of real test ( horrible spaced trees ) but windowed, so good.
-
-#default_file = 'sourceimages/mess.png' #is anomaly, says its not based on stdev, line count too low = anomoly
-#default_file = 'sourceimages/bent.png' #example of real test thats bad but should be good ( with shadows )
-
+show_image = False
 default_file = 'sourceimages/window4.png' #test image
+default_k_value = 2
 
-
-
-def kmeans(input_image):
+def kmeans(input_image, k_value):
     #A kmeans clusters algorithm that takes in an image (ideally grayscale) and applies a binerization to them.
     print("Kmeans")
     #kmeans ---------------------
@@ -75,7 +60,7 @@ def kmeans(input_image):
     pixel_vals = np.float32(pixel_vals)
 
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
-    k = 3 # Choosing number of cluster
+    k = k_value # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
@@ -105,8 +90,8 @@ def kmeans(input_image):
             elif (segmented_image[n][i][0] <= min):
                 segmented_image[n][i] = [255,255,255] #the rows (painting them white)
     print("Binerization Complete")
-    
-    cv.imshow("Kmeans extraction", segmented_image)
+    if show_image:
+        cv.imshow("Kmeans extraction", segmented_image)
 
     segmented_image = cv.cvtColor(segmented_image, cv.COLOR_BGR2GRAY) # Change color to RGB (from BGR) should mess with more options to see results
     #print("Segmented image: ",segmented_image)
@@ -172,7 +157,8 @@ def colourQuantize(input_image):
                 else:
                     quantized_image[n][i][2] = 255
         
-    cv.imshow("Quantized 12", quantized_image)
+    if show_image:
+        cv.imshow("Quantized 12", quantized_image)
     print("Colour Quantization Complete")
     return quantized_image
 
@@ -281,7 +267,7 @@ def findCentrePoints(linesP):
     if(len(xcentres_list)>=1):
         central_point = (sum(xcentres_list)/len(xcentres_list),sum(ycentres_list)/len(ycentres_list))
     else:
-        central_point = (-1,-1)
+        central_point = (0,0)
 
     #returns the list of centres and the central cluster point of all lines
     return center_points, central_point
@@ -308,27 +294,125 @@ def findCentralAccuracy(width,height,central_point):
     return accuracy_percentage
 
 #morphologyex functions
-def MorphSkeleton():
-    return 0
+def MorphSkeleton(image, kernal=None):   
+    '''
+    Skeletonizes a given image
+    @image: input image to skeletonize
+    @kernal: kernal to use, default to 3x3 cross if none given
+    @return: the skeletonized image
+    '''    
+    print("Skeletonizing")
+    #check that input is image 
+    if isinstance(image, str):
+        image = cv.imread(image) # Loading image
+    
+    skel = np.zeros(image.shape, np.uint8)
+    # Get a Cross Shaped Kernel
+    element = kernal
+    if(element == None):
+        element = cv.getStructuringElement(cv.MORPH_CROSS, (3,3))
+
+    # Repeat steps 2-4
+    while True:
+        #Step 2: Open the image
+        open = cv.morphologyEx(image, cv.MORPH_OPEN, element)
+        #Step 3: Substract open from the original image
+        temp = cv.subtract(image, open)
+        #Step 4: Erode the original image and refine the skeleton
+        eroded = cv.erode(image, element)
+        skel = cv.bitwise_or(skel,temp)
+        image = eroded.copy()
+        # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
+        if cv.countNonZero(image)==0:
+            break
+    
+    print("Skeletonizing Complete")
+    return skel
+
+def MorphOpenClose(image, kernal_open=None,kernal_close=None, iterations_open=None, iterations_close=None):
+    #check that input is image 
+    if isinstance(image, str):
+        image = cv.imread(image) # Loading image
+
+    element_open = kernal_open
+    if(element_open == None):
+        element_open = disk(1)
+
+    element_close = kernal_close
+    if(element_close == None):
+        element_close = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
 
     
-def MorphOpenClose():
-    return 0
+    ito = iterations_open
+    if(ito == None):
+        ito = 1
+
+    itc = iterations_close
+    if(itc == None):
+        itc = 1
+    
+    #kernel = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
+    opening = cv.morphologyEx(image, cv.MORPH_OPEN, element_open, ito)
+
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
+    closing = cv.morphologyEx(opening, cv.MORPH_CLOSE, element_close, itc) #closing = dilate and then erode
+    
+    return closing
 
 def MorphPrune():
     return 0 
 
 # Anomaly Functions
 def AnomalyDecide(accuracy, line_data, line_datap):
-    #rework after data collection complete
-    accuracy_decision = ""
-    if accuracy < 80:
-        accuracy_decision = "medium"
+    #base cases to judge failure by
+    line_count_min = 5
+    line_std_min = 1.0
+    accuracy_min = 80
 
-    return 0
+    #tests run
+    line_count_0_failed = False
+    line_count_n0_failed = False
+    line_stdev_failed = False
+    accuracy_failed = False
+    #total times failed
+    failure_count = 0
+    #list of test results
+    failed_cases = []
 
-def AnomalyDataCollection( image_name, image_height, image_width, accuracy, line_data, line_datap):
-    f = open("Data.txt", "a")
+    #complete failure, very likely its anomalous
+    if len(line_datap)<1:
+        line_count_0_failed = True
+        failure_count += 1
+    #low line count, may be anomalous
+    if len(line_datap)<line_count_min:
+        line_count_n0_failed = True
+        failure_count += 1
+
+    #low standard deviation, may be anomalous
+    if circstd(line_datap)>line_std_min:
+        line_stdev_failed = True
+        failure_count += 1
+
+    #low accuracy, may be anomalous
+    if (accuracy<accuracy_min):
+        accuracy_failed = True
+        failure_count += 1
+
+    #to further see which tests failed
+    failed_cases.append(["line_count_0_passed", line_count_0_failed])
+    failed_cases.append(["line_count_n0_passed", line_count_n0_failed])
+    failed_cases.append(["line_stdev_passed", line_stdev_failed])
+    failed_cases.append(["accuracy_passed", accuracy_failed])
+
+    #boolean operation, if any failed it returns True of if image is anomalous
+    return (line_count_0_failed or line_count_n0_failed or line_stdev_failed or accuracy_failed), failure_count, failed_cases
+
+def updateGlobalAccuracy(accuracy_passed_to_me):
+    accuracy_passed_to_me+=1
+    return accuracy_passed_to_me
+
+def AnomalyDataCollection(file_to_write_to, image_name, image_height, image_width, accuracy, line_data, line_datap, is_anomalous, failure_count):
+    f = open(file_to_write_to, "a")
 
     f.write(str(image_name)+" ")
     f.write(str(image_height)+" ")
@@ -341,9 +425,9 @@ def AnomalyDataCollection( image_name, image_height, image_width, accuracy, line
         f.write(str(len(line_data))+" ")
 
     else: #if no linedata is present (bad anomaly)
-        f.write("-1"+" ")
+        f.write("0"+" ")
         #f.write("-1"+" ")
-        f.write("-1"+" ")
+        f.write("0"+" ")
 
     if len(line_datap) >= 1:
         f.write(str(round(circstd(line_datap),2))+" ")
@@ -351,91 +435,65 @@ def AnomalyDataCollection( image_name, image_height, image_width, accuracy, line
         f.write(str(len(line_datap))+" ")
 
     else: #if no linedata is present (bad anomaly)
-        f.write("-1"+" ")
+        f.write("0"+" ")
         #f.write("-1"+" ")
-        f.write("-1"+" ")
+        f.write("0"+" ")
+
+    if(is_anomalous):
+        f.write("Anomalous ")
+    else:
+        f.write("Nonanomalous ")
+    
+    f.write("Failed_"+str(failure_count)+"_tests ")
 
     f.write("\n")
     f.close()
     return 0
 
-def main():
+def main(default_k_value, file_to_write, file_accuracy):
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
     histo = histogramEqualization(src)
     prek = colourQuantize(histo)
-    kmean_image = kmeans(prek)
+    kmean_image = kmeans(prek,default_k_value)
 
 
-    # --------- MORPHOLOGICAL EXPERIMENT ----------
+    # A group of kernals
     kernelrect = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
-    #print("Rect:","\n", kernelrect)
-    kerneldisk = disk(1)
-    #print("Disk:","\n", kerneldisk)
     kernelcros = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
-    #print("Cross:","\n", kernelcros)
-    kerneldiam = diamond(2)
-    #print("Diamond:","\n", kerneldiam)
     kernelline = cv.getStructuringElement(cv.MORPH_RECT, (4, 1))
-    #print("Line:","\n", kernelline)
+    kerneldiam = diamond(2)
+    kerneldisk = disk(1)
 
-    #kernel = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
-    opening = cv.morphologyEx(kmean_image, cv.MORPH_OPEN, kerneldisk, iterations=1)
-    cv.imshow("Opening", opening)
-
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
-    closing = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernelrect, iterations=1) #closing = dilate and then erode
-    cv.imshow("Closing", closing)
-
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    opening2 = cv.morphologyEx(closing, cv.MORPH_OPEN, kerneldisk, iterations=1)
-    cv.imshow("Opening2", opening2)
-
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
-    closing2 = cv.morphologyEx(opening2, cv.MORPH_CLOSE, kernelrect, iterations=1) #closing = dilate and then erode
-    cv.imshow("Closing2", closing2)
-    
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    erosion = cv.morphologyEx(closing2, cv.MORPH_ERODE, kernelrect, iterations=1)
-    cv.imshow("Erosion", erosion)
-
-    erosion = closing2
+    first_openclose = MorphOpenClose(kmean_image)
+    second_openclose = MorphOpenClose(first_openclose)
 
     #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
     #opening3 = cv.morphologyEx(erosion, cv.MORPH_OPEN, kernel, iterations=1)
-    #cv.imshow("Opening3", opening3)
-
-    # --------- SKELETONIZATION EXPERIMENT ----------
-    #ret,img = cv.threshold(erosion, 127, 255, 0)
+    #if show_image:
+    #    cv.imshow("Opening3", opening3)
 
     # Step 1: Create an empty skeleton
     #size = np.size(img)
-    skel = np.zeros(erosion.shape, np.uint8)
+    skel = MorphSkeleton(second_openclose)
+    if show_image:
+        cv.imshow("Skeleton", skel)
+    
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    erosion = cv.morphologyEx(skel, cv.MORPH_ERODE, kernelrect, iterations=1)
+    if show_image:
+        cv.imshow("Erosion", erosion)
 
-    # Get a Cross Shaped Kernel
-    element = cv.getStructuringElement(cv.MORPH_CROSS, (3,3))
-    # Repeat steps 2-4
-    while True:
-        #Step 2: Open the image
-        open = cv.morphologyEx(erosion, cv.MORPH_OPEN, element)
-        #Step 3: Substract open from the original image
-        temp = cv.subtract(erosion, open)
-        #Step 4: Erode the original image and refine the skeleton
-        eroded = cv.erode(erosion, element)
-        skel = cv.bitwise_or(skel,temp)
-        erosion = eroded.copy()
-        # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
-        if cv.countNonZero(erosion)==0:
-            break
-
-    cv.imshow("Skeleton", skel)
+    erosion = skel
 
     #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
-    prune = cv.morphologyEx(skel, cv.MORPH_CLOSE, kernelline, iterations=2)
+    prune = cv.morphologyEx(erosion, cv.MORPH_CLOSE, kernelline, iterations=2)
+    prune = skel
     
     #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
     #prune = cv.morphologyEx(prune, cv.MORPH_ERODE, kernel, iterations=1)
-    cv.imshow("Prune", prune)
+    if show_image:
+        cv.imshow("Prune", prune)
 
     
     #output canny (not good)
@@ -475,11 +533,12 @@ def main():
 
     cdstP = drawlinesCentre(cdstP, central_point)
 
-    cv.imshow("Original Source", src)
-    cv.imshow("Cannied", dst)
-    cv.imshow("Histogramed", histo)
-    cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
-    cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
+    if show_image:
+        cv.imshow("Original Source", src)
+        cv.imshow("Cannied", dst)
+        cv.imshow("Histogramed", histo)
+        cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
+        cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 
     # looking at some stats
     theta_data = getThetaData(lines)
@@ -498,25 +557,28 @@ def main():
         print("Standdev of line dataP: ", circstd(clean_theta_dataP))
         print("Mean of line dataP: ", circmean(clean_theta_dataP))
         print("Count of line dataP: ", len(clean_theta_dataP))
-    #graphTheta(theta_dataP)
 
-    AnomalyDataCollection(default_file, image_height, image_width, accuracy, clean_theta_data, clean_theta_dataP)
+    is_image_anomalous, failure_count, failed_tests  = AnomalyDecide(accuracy, clean_theta_data, clean_theta_dataP)
+    AnomalyDataCollection(file_to_write, default_file, image_height, image_width, accuracy, clean_theta_data, clean_theta_dataP, is_image_anomalous, failure_count)
 
-    # ----------------- PH PH PH -----------------
-    #anomaly_decision, reason_decision = AnomalyDecide(accuracy, clean_theta_data, clean_theta_dataP)
+    
+    #PH PH PH
+    if(is_image_anomalous):
+        if "bad" in default_file:
+            file_accuracy = updateGlobalAccuracy(file_accuracy)
+
+    if(not is_image_anomalous):
+        if "window" in default_file:
+            file_accuracy = updateGlobalAccuracy(file_accuracy)
     
     cv.waitKey()
-    return 0
+    return file_accuracy
 
 
 if __name__ == "__main__":
     #simpletest()
     print("--- Starting ---")
-
-    f = open("Data.txt","w")
-    #simple header
-    f.write("image_name, frame height, frame width, central accuracy, standard stdev/count, probablistic stdev/count\n")
-    f.close()
+    what_were_testing = "without_prune"
 
     print("--- Finding Files ---")
     files_to_run = []
@@ -527,9 +589,21 @@ if __name__ == "__main__":
                 files_to_run.append(name)
     
     print("--- Files Found ---")
+    for j in range(5):
+        file_accuracy = 0
+        file_to_write_to_global = "Data_"+str(int(j+2))+"_"+what_were_testing+".txt"
 
-    for i in range(len(files_to_run)):
-        default_file = "sourceimages/"+str(files_to_run[i])
-        main()
+        f = open(file_to_write_to_global,"w")
+        #simple header
+        f.write("image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision\n")
+        f.close()
+        for i in range(len(files_to_run)):
+            default_file = "sourceimages/"+str(files_to_run[i])
+            default_k_value = j+2 #2 3 4 5 6
+            file_accuracy = main(default_k_value, file_to_write_to_global, file_accuracy)
+        f = open(file_to_write_to_global,"a")
+        print("Global accuracy: ", file_accuracy)
+        f.write(str(file_accuracy)+"\n")
+        f.close()
         
     print("--- Finished ---")
