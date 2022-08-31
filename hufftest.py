@@ -540,6 +540,10 @@ def main(default_k_value, file_to_write, file_accuracy):
         cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
         cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 
+    #if "special" in default_file:
+    #    cv.imshow("Special Image", src)
+
+
     # looking at some stats
     theta_data = getThetaData(lines)
     theta_dataP = getThetaDataP(linesP)
