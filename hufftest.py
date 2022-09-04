@@ -4,6 +4,7 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import time
 #external libraries functions
 from scipy.stats import circstd, circmean
 from skimage.morphology import disk, diamond
@@ -289,6 +290,7 @@ def findCentralAccuracy(width,height,central_point):
 
 #morphologyex functions
 def MorphSkeleton(image, kernal=None):   
+    #code taken from 
     '''
     Skeletonizes a given image
     @image: input image to skeletonize
@@ -353,8 +355,35 @@ def MorphOpenClose(image, kernal_open=None,kernal_close=None, iterations_open=No
     
     return closing
 
-def MorphPrune():
-    return 0 
+def MorphPrune(image, kernal_erode=None,kernal_prune=None, iterations_erode=None, iterations_prune=None):
+    #check that input is image 
+    if isinstance(image, str):
+        image = cv.imread(image) # Loading image
+    
+    element_open = kernal_erode
+    if(element_open == None):
+        element_open = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
+
+    element_close = kernal_prune
+    if(element_close == None):
+        element_close = cv.getStructuringElement(cv.MORPH_RECT, (3, 1))
+
+    
+    ite = iterations_erode
+    if(ite == None):
+        ite = 1
+
+    itp = iterations_prune
+    if(itp == None):
+        itp = 1
+    
+    #performe an erosion operation
+    erosion = cv.morphologyEx(image, cv.MORPH_ERODE, element_open, ite)
+
+    #perform a pruning operation
+    prune = cv.morphologyEx(erosion, cv.MORPH_CLOSE, element_close, itp)
+
+    return prune
 
 # Anomaly Functions
 def AnomalyDecide(accuracy, line_data, line_datap):
@@ -455,7 +484,7 @@ def main(default_k_value, file_to_write, file_accuracy):
     # A group of kernals
     kernelrect = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
     kernelcros = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
-    kernelline = cv.getStructuringElement(cv.MORPH_RECT, (4, 1))
+    kernelline = cv.getStructuringElement(cv.MORPH_RECT, (3, 1))
     kerneldiam = diamond(2)
     kerneldisk = disk(1)
 
@@ -466,43 +495,35 @@ def main(default_k_value, file_to_write, file_accuracy):
     #opening3 = cv.morphologyEx(erosion, cv.MORPH_OPEN, kernel, iterations=1)
     #if show_image:
     #    cv.imshow("Opening3", opening3)
+    prune = MorphPrune(second_openclose)
+    if show_image:
+        cv.imshow("Prune", prune)
 
     # Step 1: Create an empty skeleton
     #size = np.size(img)
-    skel = MorphSkeleton(second_openclose)
+    skel = MorphSkeleton(prune)
     if show_image:
         cv.imshow("Skeleton", skel)
     
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    erosion = cv.morphologyEx(skel, cv.MORPH_ERODE, kernelrect, iterations=1)
-    if show_image:
-        cv.imshow("Erosion", erosion)
-
-    erosion = skel
-
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
-    prune = cv.morphologyEx(erosion, cv.MORPH_CLOSE, kernelline, iterations=2)
-    prune = skel
+    #prune = skel
     
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2))
+    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2)
     #prune = cv.morphologyEx(prune, cv.MORPH_ERODE, kernel, iterations=1)
-    if show_image:
-        cv.imshow("Prune", prune)
 
     
     #output canny (not good)
     #easy placeholder until morphological pruning
-    dst = cv.Canny(prune, 20, 100, None, 3)
+    #dst = cv.Canny(prune, 20, 100, None, 3)
 
 
     # Copy edges to the images that will display the results in BGR
-    cdst = cv.cvtColor(prune, cv.COLOR_GRAY2BGR)
+    cdst = cv.cvtColor(skel, cv.COLOR_GRAY2BGR)
     cdstP = np.copy(cdst)
 
     #draw lines on image - non probabalistic
     #accumulator min dependent on image
     # testing found with big spaced trees = 150, smaller 200x200 windows = 50
-    lines = cv.HoughLines(prune, 1, np.pi / 180, 100, None, 0, 0)
+    lines = cv.HoughLines(skel, 1, np.pi / 180, 100, None, 0, 0)
     drawlines(cdst,lines)
     drawlines(src,lines)
     
@@ -529,7 +550,7 @@ def main(default_k_value, file_to_write, file_accuracy):
 
     if show_image:
         cv.imshow("Original Source", src)
-        cv.imshow("Cannied", dst)
+        #cv.imshow("Cannied", dst)
         cv.imshow("Histogramed", histo)
         cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
         cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
@@ -566,7 +587,7 @@ def main(default_k_value, file_to_write, file_accuracy):
             file_accuracy = updateGlobalAccuracy(file_accuracy)
 
     if(not is_image_anomalous):
-        if "window" in default_file:
+        if "good" in default_file:
             file_accuracy = updateGlobalAccuracy(file_accuracy)
     
     cv.waitKey()
@@ -575,33 +596,47 @@ def main(default_k_value, file_to_write, file_accuracy):
 
 if __name__ == "__main__":
     #simpletest()
+    #write the stdev, central poit accuracy, and line counts only to a file for easier mass analysis.
+    #also sperate good and bad, and critical failure rate.
+    #hand analyzing data is tedious
     print("--- Starting ---")
-    what_were_testing = "without_prune"
+    what_were_testing = "with_prune_no_HE"
 
     print("--- Finding Files ---")
     files_to_run = []
-    path = "sourceimages/"
+    path = "windows/"
     for root, dirs, files in os.walk(path):
         for name in files:
             if name.endswith(".png"):
                 files_to_run.append(name)
     
     print("--- Files Found ---")
-    for j in range(5):
+    for j in range(3):
         file_accuracy = 0
-        file_to_write_to_global = "Data_"+str(int(j+2))+"_"+what_were_testing+".txt"
+        file_to_write_to_global = "Data_k"+str(int(j+2))+"_"+what_were_testing+".txt"
+        file_to_write_to_times = "Data_Times_k"+str(int(j+2))+"_"+what_were_testing+".txt"
 
         f = open(file_to_write_to_global,"w")
         #simple header
         f.write("image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision\n")
         f.close()
+        p = open(file_to_write_to_times,"w")
+        p.write("image_name, time\n")
+        p.close()
         for i in range(len(files_to_run)):
-            default_file = "sourceimages/"+str(files_to_run[i])
+            default_file = path+str(files_to_run[i])
             default_k_value = j+2 #2 3 4 5 6
+            start = time.time()
             file_accuracy = main(default_k_value, file_to_write_to_global, file_accuracy)
+            end = time.time()
+            total_time = end - start
+            p = open(file_to_write_to_times,"a")
+            p.write(str(default_file)+" "+str(total_time)+"\n")
+            p.close()
+
         f = open(file_to_write_to_global,"a")
-        print("Global accuracy: ", file_accuracy)
-        f.write(str(file_accuracy)+"\n")
+        print("Global accuracy: ", (file_accuracy/len(files_to_run)))
+        f.write(str((file_accuracy/len(files_to_run)))+"\n")
         f.close()
         
     print("--- Finished ---")

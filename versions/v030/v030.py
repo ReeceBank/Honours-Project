@@ -12,7 +12,7 @@ from versions.linedrawer import drawlines, drawlinesp
 
 version_name = "v030"
 
-default_file = 'sourceimages/real.png' #tested with julians images
+default_file = 'sourceimages/windowspecial-2.png' #tested with julians images
 default_parameter_list = []
 
 def run(src_image, parameter_list):
@@ -27,7 +27,7 @@ def run(src_image, parameter_list):
     
     #output canny (not good)
     #easy placeholder until morphological pruning
-    greensrc = cv.Canny(greensrc, 280, 290, None, 3)
+    #greensrc = cv.Canny(greensrc, 280, 290, None, 3)
 
     size = np.size(greensrc) #returns the product of the array dimensions
 
@@ -63,6 +63,8 @@ def run(src_image, parameter_list):
 
     #view the green extracted image
     cv.imshow("Source", csrc)
+    cv.imshow("Lines", srchough)
+    cv.imshow("Linesp", srchoughp)
     
     cv.waitKey()
     return 0

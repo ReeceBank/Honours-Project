@@ -1,0 +1,32 @@
+image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision
+windows/bad18-1_bend.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/bad18-2_bend.png 300 300 49.83 -0.0 1 -0.0 1 Anomalous Failed_2_tests 
+windows/bad18-3_bend.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/bad_11_300.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/bad_13_300.png 300 300 85.44 -0.0 1 1.08 8 Anomalous Failed_1_tests 
+windows/bad_15_300.png 300 300 79.41 -0.0 1 0.25 18 Anomalous Failed_1_tests 
+windows/bad_16_300_smallholes.png 205 201 57.15 0 0 0.0 3 Anomalous Failed_2_tests 
+windows/bad_17_300.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/bad_1_300.png 300 300 64.38 0 0 0.92 8 Anomalous Failed_1_tests 
+windows/bad_2_300.png 300 300 25.0 0 0 -0.0 1 Anomalous Failed_2_tests 
+windows/bad_3_300.png 301 301 67.76 0.05 12 0.42 19 Anomalous Failed_1_tests 
+windows/bad_4_300.png 300 300 66.67 0 0 1.43 4 Anomalous Failed_3_tests 
+windows/bad_5_300.png 300 300 73.0 0 0 -0.0 1 Anomalous Failed_2_tests 
+windows/bad_6_300.png 300 300 60.2 0.43 4 0.28 11 Anomalous Failed_1_tests 
+windows/bad_7_300.png 300 300 88.67 0 0 -0.0 1 Anomalous Failed_1_tests 
+windows/bad_8_300_bighole.png 300 300 77.19 0.52 13 0.36 41 Anomalous Failed_1_tests 
+windows/bad_9_300.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/bad_9_300_smallhole.png 300 300 82.67 0.3 9 0.4 27 Nonanomalous Failed_0_tests 
+windows/good_12_300.png 300 300 96.59 0.03 8 0.46 27 Nonanomalous Failed_0_tests 
+windows/good_13_bend.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/good_14_realreal.png 300 300 90.97 0 0 0.52 13 Nonanomalous Failed_0_tests 
+windows/good_1_300.png 300 300 90.94 0 0 0.4 9 Nonanomalous Failed_0_tests 
+windows/good_2_300_special.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/good_3_300_special.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+windows/good_4_300.png 300 300 87.49 0.39 5 0.41 27 Nonanomalous Failed_0_tests 
+windows/good_5_300.png 300 300 87.68 -0.0 6 0.5 20 Nonanomalous Failed_0_tests 
+windows/good_6_300.png 300 300 90.01 0.76 16 0.43 42 Nonanomalous Failed_0_tests 
+windows/good_7_300.png 225 227 57.36 -0.0 1 0.29 8 Anomalous Failed_1_tests 
+windows/good_8_300.png 300 300 88.77 0.04 15 0.29 24 Nonanomalous Failed_0_tests 
+windows/good_9_300.png 300 300 0.0 0 0 0 0 Anomalous Failed_3_tests 
+0.8
