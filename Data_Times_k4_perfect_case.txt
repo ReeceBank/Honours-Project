@@ -1,0 +1,3 @@
+image_name, time
+testcase/bad_15_300.png 4.8014771938323975
+testcase/bad_16_300_smallholes.png 1.3485970497131348

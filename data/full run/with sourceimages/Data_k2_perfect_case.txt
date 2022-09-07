@@ -1,0 +1,34 @@
+image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision, binary decision, total failed tests 
+sourceimages/bad1-1.png 200 200 69.75 0 0 2.77 2 Anomalous: 1 3
+sourceimages/bad1.png 200 200 49.75 0.0 1 -0.0 1 Anomalous: 1 2
+sourceimages/bad10-2_bend.png 200 200 0.0 0 0 0 0 Anomalous: 1 3
+sourceimages/bad10-3_bend.png 200 200 65.62 0 0 1.08 6 Anomalous: 1 2
+sourceimages/bad10_bend.png 200 200 54.38 -0.0 1 0.36 2 Anomalous: 1 2
+sourceimages/bad11_hole.png 200 200 97.84 0.82 7 0.64 27 Nonanomalous: 0 0
+sourceimages/bad12.png 200 200 73.83 0 0 0.8 9 Anomalous: 1 1
+sourceimages/bad2-1.png 200 200 81.12 -0.0 1 0.52 2 Anomalous: 1 1
+sourceimages/bad3-1.png 200 200 79.5 0 0 0.87 5 Anomalous: 1 1
+sourceimages/bad3-2.png 200 200 74.27 0.71 9 0.84 11 Anomalous: 1 1
+sourceimages/bad4-2.png 200 200 0.0 0 0 0 0 Anomalous: 1 3
+sourceimages/bad4.png 200 200 92.17 0 0 1.02 3 Anomalous: 1 2
+sourceimages/bad5_hole.png 200 200 95.81 -0.0 9 0.64 27 Nonanomalous: 0 0
+sourceimages/bad6.png 150 150 93.46 0.09 3 1.41 16 Anomalous: 1 1
+sourceimages/bad7.png 200 200 80.62 0 0 1.24 4 Anomalous: 1 2
+sourceimages/bad8.png 200 200 96.5 -0.0 1 -0.0 2 Anomalous: 1 1
+sourceimages/bad9-2.png 200 200 0.0 0 0 0 0 Anomalous: 1 3
+sourceimages/bad9.png 200 200 86.92 0 0 0.4 3 Anomalous: 1 1
+sourceimages/badspecial-1.png 500 500 93.54 0 0 1.72 28 Anomalous: 1 1
+sourceimages/window-71120-nodownscale.png 400 400 96.31 0.0 4 0.61 26 Nonanomalous: 0 0
+sourceimages/window1.png 200 200 96.19 0.54 15 0.48 16 Nonanomalous: 0 0
+sourceimages/window2_long.png 418 282 94.77 0.36 32 0.35 39 Nonanomalous: 0 0
+sourceimages/window3.png 384 602 91.7 -0.0 4 0.83 36 Nonanomalous: 0 0
+sourceimages/window4.png 200 200 98.8 0.5 24 0.56 31 Nonanomalous: 0 0
+sourceimages/window5.png 200 200 85.53 0.5 8 0.66 27 Nonanomalous: 0 0
+sourceimages/window6.png 150 150 99.53 0.04 10 0.44 15 Nonanomalous: 0 0
+sourceimages/window7.png 200 200 86.54 0 0 0.57 12 Nonanomalous: 0 0
+sourceimages/window8-1.png 200 200 95.21 1.34 27 -0.0 34 Nonanomalous: 0 0
+sourceimages/window8-2.png 200 200 92.69 -0.0 1 0.53 26 Nonanomalous: 0 0
+sourceimages/windowspecial-1.png 200 200 45.75 0 0 -0.0 1 Anomalous: 1 2
+sourceimages/windowspecial-2.png 200 200 78.01 0.04 9 0.33 18 Anomalous: 1 1
+sourceimages/windowspecial-3_bend.png 300 300 68.28 0 0 1.57 3 Anomalous: 1 3
+0.84375

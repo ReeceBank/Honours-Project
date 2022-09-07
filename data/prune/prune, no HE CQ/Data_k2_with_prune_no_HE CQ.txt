@@ -1,0 +1,33 @@
+image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision
+windows/bad18-1_bend.png 300 300 64.33 -0.0 1 0.86 4 Anomalous: 1 2
+windows/bad18-2_bend.png 300 300 75.58 -0.0 1 1.64 8 Anomalous: 1 2
+windows/bad18-3_bend.png 300 300 70.17 0 0 -0.0 1 Anomalous: 1 2
+windows/bad_11_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_13_300.png 300 300 97.27 0.58 24 1.51 49 Anomalous: 1 1
+windows/bad_15_300.png 300 300 92.04 0.43 8 0.67 44 Nonanomalous: 0 0
+windows/bad_16_300_smallholes.png 205 201 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_17_300.png 300 300 79.67 0 0 1.34 19 Anomalous: 1 2
+windows/bad_1_300.png 300 300 49.83 0.0 1 -0.0 1 Anomalous: 1 2
+windows/bad_2_300.png 300 300 61.5 1.31 2 1.16 2 Anomalous: 1 3
+windows/bad_3_300.png 301 301 75.45 0.54 15 0.56 27 Anomalous: 1 1
+windows/bad_4_300.png 300 300 95.17 0 0 1.54 17 Anomalous: 1 1
+windows/bad_5_300.png 300 300 76.89 0 0 0.13 3 Anomalous: 1 2
+windows/bad_6_300.png 300 300 90.72 0.49 2 1.43 3 Anomalous: 1 2
+windows/bad_7_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_8_300_bighole.png 300 300 86.67 0 0 1.02 3 Anomalous: 1 2
+windows/bad_9_300.png 300 300 73.25 -0.0 1 0.98 4 Anomalous: 1 2
+windows/bad_9_300_smallhole.png 300 300 61.75 0 0 -0.0 2 Anomalous: 1 2
+windows/good_12_300.png 300 300 97.61 0.04 10 0.43 34 Nonanomalous: 0 0
+windows/good_13_bend.png 300 300 37.83 0 0 -0.0 1 Anomalous: 1 2
+windows/good_14_realreal.png 300 300 95.86 -0.0 1 0.83 15 Nonanomalous: 0 0
+windows/good_15_specialHE.png 300 300 76.12 0.68 9 0.44 17 Anomalous: 1 1
+windows/good_1_300.png 300 300 94.82 0.05 17 0.45 25 Nonanomalous: 0 0
+windows/good_2_300_special.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_3_300_special.png 300 300 66.57 0 0 0.81 5 Anomalous: 1 1
+windows/good_4_300.png 300 300 98.77 0.56 32 0.48 53 Nonanomalous: 0 0
+windows/good_5_300.png 300 300 84.64 1.3 3 0.37 11 Nonanomalous: 0 0
+windows/good_6_300.png 300 300 96.24 2.05 41 -0.0 60 Nonanomalous: 0 0
+windows/good_7_300.png 300 300 97.04 -0.0 6 0.88 63 Nonanomalous: 0 0
+windows/good_8_300.png 300 300 98.51 0.38 29 0.37 32 Nonanomalous: 0 0
+windows/good_9_300.png 300 300 87.75 0 0 0.61 19 Nonanomalous: 0 0
+0.8387096774193549

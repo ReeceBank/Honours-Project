@@ -1,0 +1,33 @@
+image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision
+windows/bad18-1_bend.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad18-2_bend.png 300 300 84.88 -0.0 1 1.25 7 Anomalous: 1 1
+windows/bad18-3_bend.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_11_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_13_300.png 300 300 92.89 0.11 12 1.42 36 Anomalous: 1 1
+windows/bad_15_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_16_300_smallholes.png 205 201 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_17_300.png 300 300 70.07 0 0 0.83 7 Anomalous: 1 1
+windows/bad_1_300.png 300 300 71.97 0.13 8 0.45 16 Anomalous: 1 1
+windows/bad_2_300.png 300 300 78.72 0 0 0.98 3 Anomalous: 1 2
+windows/bad_3_300.png 301 301 70.27 0 0 -0.0 1 Anomalous: 1 2
+windows/bad_4_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_5_300.png 300 300 75.5 0 0 -0.0 1 Anomalous: 1 2
+windows/bad_6_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_7_300.png 300 300 71.42 0 0 0.5 2 Anomalous: 1 2
+windows/bad_8_300_bighole.png 300 300 37.92 0 0 0.38 2 Anomalous: 1 2
+windows/bad_9_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/bad_9_300_smallhole.png 300 300 86.5 0 0 -0.0 1 Anomalous: 1 1
+windows/good_12_300.png 300 300 65.97 0 0 0.15 5 Anomalous: 1 1
+windows/good_13_bend.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_14_realreal.png 300 300 86.86 0 0 0.36 12 Nonanomalous: 0 0
+windows/good_15_specialHE.png 300 300 97.81 0.03 11 0.57 37 Nonanomalous: 0 0
+windows/good_1_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_2_300_special.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_3_300_special.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_4_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_5_300.png 300 300 96.73 0.04 16 0.21 35 Nonanomalous: 0 0
+windows/good_6_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_7_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+windows/good_8_300.png 300 300 93.67 0 0 0.17 4 Anomalous: 1 1
+windows/good_9_300.png 300 300 0.0 0 0 0 0 Anomalous: 1 3
+0.6774193548387096

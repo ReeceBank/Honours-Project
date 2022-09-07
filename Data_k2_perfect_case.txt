@@ -1,0 +1,4 @@
+image_name, central_accuracy, probablistic_stdev, probablistic_count, decision, binary_decision, total_failed_tests 
+testcase/bad_15_300.png 85.27 0.67 41 Nonanomalous: 0 0
+testcase/bad_16_300_smallholes.png 96.87 0.3 27 Nonanomalous: 0 0
+0.0

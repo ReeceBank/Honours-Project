@@ -1,8 +1,0 @@
-image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision
-windows/bad18-1_bend.png 300 300 73.61 0 0 1.5 6 Anomalous Failed_2_tests 
-windows/bad18-2_bend.png 300 300 49.83 -0.0 1 -0.0 1 Anomalous Failed_2_tests 
-windows/bad18-3_bend.png 300 300 82.33 0 0 0.67 2 Anomalous Failed_1_tests 
-windows/bad_11_300.png 300 300 59.5 0 0 -0.0 1 Anomalous Failed_2_tests 
-windows/bad_13_300.png 300 300 91.44 0.13 12 1.4 42 Anomalous Failed_1_tests 
-windows/bad_15_300.png 300 300 79.49 -0.0 3 0.44 25 Anomalous Failed_1_tests 
-windows/bad_16_300_smallholes.png 205 201 76.12 -0.0 6 0.22 23 Anomalous Failed_1_tests 

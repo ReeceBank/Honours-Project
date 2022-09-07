@@ -1,0 +1,5 @@
+prune with no HE is just worse than prune in all cases(could be due to CQ). Processing speeds are similar so HE has little to no performance impact.
+
+prune with no CQ seems to perform better than with CQ under low K but same at higher K (83% rate)
+
+disk 3 always worse

@@ -35,7 +35,7 @@ from versions.linedrawer import drawlines, drawlinesp, drawlinesCentre
     # mean from 86.624 to 88.911 (better)
     # linecount from 75 to 64 (argubly worse?)
 
-show_image = False
+show_image = True
 default_file = 'sourceimages/window4.png' #test image
 default_k_value = 2
 
@@ -438,19 +438,19 @@ def AnomalyDataCollection(file_to_write_to, image_name, image_height, image_widt
     f = open(file_to_write_to, "a")
 
     f.write(str(image_name)+" ")
-    f.write(str(image_height)+" ")
-    f.write(str(image_width)+" ")
+    #f.write(str(image_height)+" ")
+    #f.write(str(image_width)+" ")
     f.write(str(round(accuracy,2))+" ")
 
-    if len(line_data) >= 1:
-        f.write(str(round(circstd(line_data),2))+" ")
+    #if len(line_data) >= 1:
+    #    f.write(str(round(circstd(line_data),2))+" ")
         #f.write(str(round(circmean(line_data),2))+" ")
-        f.write(str(len(line_data))+" ")
+    #    f.write(str(len(line_data))+" ")
 
-    else: #if no linedata is present (bad anomaly)
-        f.write("0"+" ")
+    #else: #if no linedata is present (bad anomaly)
+    #    f.write("0"+" ")
         #f.write("-1"+" ")
-        f.write("0"+" ")
+    #    f.write("0"+" ")
 
     if len(line_datap) >= 1:
         f.write(str(round(circstd(line_datap),2))+" ")
@@ -463,11 +463,11 @@ def AnomalyDataCollection(file_to_write_to, image_name, image_height, image_widt
         f.write("0"+" ")
 
     if(is_anomalous):
-        f.write("Anomalous ")
+        f.write("Anomalous: 1 ")
     else:
-        f.write("Nonanomalous ")
+        f.write("Nonanomalous: 0 ")
     
-    f.write("Failed_"+str(failure_count)+"_tests ")
+    f.write(str(failure_count))
 
     f.write("\n")
     f.close()
@@ -477,8 +477,14 @@ def main(default_k_value, file_to_write, file_accuracy):
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
     histo = histogramEqualization(src)
+    if show_image:
+        cv.imshow("histogramEqualization", histo)
     prek = colourQuantize(histo)
+    if show_image:
+        cv.imshow("colourQuantize", prek)
     kmean_image = kmeans(prek,default_k_value)
+    if show_image:
+        cv.imshow("kmeans", kmean_image)
 
 
     # A group of kernals
@@ -497,13 +503,13 @@ def main(default_k_value, file_to_write, file_accuracy):
     #    cv.imshow("Opening3", opening3)
     prune = MorphPrune(second_openclose)
     if show_image:
-        cv.imshow("Prune", prune)
+        cv.imshow("MorphPrune", prune)
 
     # Step 1: Create an empty skeleton
     #size = np.size(img)
     skel = MorphSkeleton(prune)
     if show_image:
-        cv.imshow("Skeleton", skel)
+        cv.imshow("MorphSkeleton", skel)
     
     #prune = skel
     
@@ -551,7 +557,7 @@ def main(default_k_value, file_to_write, file_accuracy):
     if show_image:
         cv.imshow("Original Source", src)
         #cv.imshow("Cannied", dst)
-        cv.imshow("Histogramed", histo)
+        #cv.imshow("Histogramed", histo)
         cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
         cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 
@@ -589,6 +595,10 @@ def main(default_k_value, file_to_write, file_accuracy):
     if(not is_image_anomalous):
         if "good" in default_file:
             file_accuracy = updateGlobalAccuracy(file_accuracy)
+
+    #if(not is_image_anomalous):
+    #    if "window" in default_file:
+    #        file_accuracy = updateGlobalAccuracy(file_accuracy)
     
     cv.waitKey()
     return file_accuracy
@@ -599,26 +609,28 @@ if __name__ == "__main__":
     #write the stdev, central poit accuracy, and line counts only to a file for easier mass analysis.
     #also sperate good and bad, and critical failure rate.
     #hand analyzing data is tedious
+
+    #removed a lot of writes
     print("--- Starting ---")
-    what_were_testing = "with_prune_no_HE"
+    what_were_testing = "perfect_case"
 
     print("--- Finding Files ---")
     files_to_run = []
-    path = "windows/"
+    path = "testcase/"
     for root, dirs, files in os.walk(path):
         for name in files:
             if name.endswith(".png"):
                 files_to_run.append(name)
     
     print("--- Files Found ---")
-    for j in range(3):
+    for j in range(4):
         file_accuracy = 0
         file_to_write_to_global = "Data_k"+str(int(j+2))+"_"+what_were_testing+".txt"
         file_to_write_to_times = "Data_Times_k"+str(int(j+2))+"_"+what_were_testing+".txt"
 
         f = open(file_to_write_to_global,"w")
         #simple header
-        f.write("image_name, frame_height, frame_width, central_accuracy, standard_stdev, standard_count, probablistic_stdev, probablistic_count, decision\n")
+        f.write("image_name, central_accuracy, probablistic_stdev, probablistic_count, decision, binary_decision, total_failed_tests \n")
         f.close()
         p = open(file_to_write_to_times,"w")
         p.write("image_name, time\n")
@@ -626,6 +638,7 @@ if __name__ == "__main__":
         for i in range(len(files_to_run)):
             default_file = path+str(files_to_run[i])
             default_k_value = j+2 #2 3 4 5 6
+            print(default_file)
             start = time.time()
             file_accuracy = main(default_k_value, file_to_write_to_global, file_accuracy)
             end = time.time()

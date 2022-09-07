@@ -1,8 +1,0 @@
-image_name, time
-windows/bad18-1_bend.png 1.6110002994537354
-windows/bad18-2_bend.png 1.6175003051757812
-windows/bad18-3_bend.png 1.5990009307861328
-windows/bad_11_300.png 1.786999225616455
-windows/bad_13_300.png 1.8659999370574951
-windows/bad_15_300.png 1.7034988403320312
-windows/bad_16_300_smallholes.png 0.8130021095275879
