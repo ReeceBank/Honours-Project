@@ -35,7 +35,7 @@ from versions.linedrawer import drawlines, drawlinesp, drawlinesCentre
     # mean from 86.624 to 88.911 (better)
     # linecount from 75 to 64 (argubly worse?)
 
-show_image = True
+show_image = False
 default_file = 'sourceimages/window4.png' #test image
 default_k_value = 2
 
@@ -110,8 +110,8 @@ def histogramEqualization(input_image):
     return histo_image
 
 def colourQuantize(input_image):
-    #reduces the colour spectrum from 255*255*255 colour variations to 3*3*3 total variations
-    #ideally takes in NON grayscale image, RGB only. (or 3 channel images)
+    #reduces the colour spectrum from 255*255*255 colour variations to 4*4*4 total variations
+    #ideally takes in NON grayscale image, RGB only. (or other 3 channel images)
     quantize_count = 12 #how many variation to reduce to. static value because i planned to try out more than 12 combinations.
     #take in an image and reduce it down to max of 12 channel types, [0 64 128 255] for r,g,b
     print("Colour Quantization")
@@ -122,7 +122,7 @@ def colourQuantize(input_image):
     
     quantized_image = cv.cvtColor(input_image, cv.COLOR_BGR2RGB) # Change color to RGB (from BGR) 
 
-    if(quantize_count == 12): #default case when you want 12 total channel types
+    if(quantize_count == 12): #default case when you want 12 total channel types (future work)
         for n in range(len(quantized_image)):
             for i in range(len(quantized_image[0])):
                 if(quantized_image[n][i][0] < 64):
@@ -152,8 +152,6 @@ def colourQuantize(input_image):
                 else:
                     quantized_image[n][i][2] = 255
         
-    if show_image:
-        cv.imshow("Quantized 12", quantized_image)
     print("Colour Quantization Complete")
     return quantized_image
 
@@ -390,7 +388,7 @@ def AnomalyDecide(accuracy, line_data, line_datap):
     #base cases to judge failure by
     line_count_min = 5
     line_std_min = 1.0
-    accuracy_min = 80
+    accuracy_min = 81
 
     #tests run
     line_count_0_failed = False
@@ -473,18 +471,38 @@ def AnomalyDataCollection(file_to_write_to, image_name, image_height, image_widt
     f.close()
     return 0
 
+def GreenExtract(image):
+    #check image
+    if isinstance(image, str):
+        image = cv.imread(image) # Loading image
+
+    #extract the blue,green,red bands
+    greensrc = np.copy(image)
+    #we disregard red and blue
+    for n in range(len(greensrc)):
+        for i in range(len(greensrc[0])):
+            greensrc[n][i][0] = max(2*greensrc[n][i][1]-greensrc[n][i][0]-greensrc[n][i][2],0)
+            greensrc[n][i][1] = max(2*greensrc[n][i][1]-greensrc[n][i][0]-greensrc[n][i][2],0)
+            greensrc[n][i][2] = max(2*greensrc[n][i][1]-greensrc[n][i][0]-greensrc[n][i][2],0)
+    
+    return greensrc
+
 def main(default_k_value, file_to_write, file_accuracy):
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
-    histo = histogramEqualization(src)
+    srcoriginal = cv.imread(cv.samples.findFile(default_file))
+    #src = GreenExtract(src)
+    #if show_image:
+    #    cv.imshow("GreenExtract", src)
+    src = histogramEqualization(src)
     if show_image:
-        cv.imshow("histogramEqualization", histo)
-    prek = colourQuantize(histo)
+        cv.imshow("histogramEqualization", src)
+    src = colourQuantize(src)
     if show_image:
-        cv.imshow("colourQuantize", prek)
-    kmean_image = kmeans(prek,default_k_value)
+        cv.imshow("colourQuantize", src)
+    kme = kmeans(src,default_k_value)
     if show_image:
-        cv.imshow("kmeans", kmean_image)
+        cv.imshow("kmeans", kme)
 
 
     # A group of kernals
@@ -494,7 +512,7 @@ def main(default_k_value, file_to_write, file_accuracy):
     kerneldiam = diamond(2)
     kerneldisk = disk(1)
 
-    first_openclose = MorphOpenClose(kmean_image)
+    first_openclose = MorphOpenClose(kme)
     second_openclose = MorphOpenClose(first_openclose)
 
     #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
@@ -511,12 +529,6 @@ def main(default_k_value, file_to_write, file_accuracy):
     if show_image:
         cv.imshow("MorphSkeleton", skel)
     
-    #prune = skel
-    
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (2, 2)
-    #prune = cv.morphologyEx(prune, cv.MORPH_ERODE, kernel, iterations=1)
-
-    
     #output canny (not good)
     #easy placeholder until morphological pruning
     #dst = cv.Canny(prune, 20, 100, None, 3)
@@ -531,13 +543,13 @@ def main(default_k_value, file_to_write, file_accuracy):
     # testing found with big spaced trees = 150, smaller 200x200 windows = 50
     lines = cv.HoughLines(skel, 1, np.pi / 180, 100, None, 0, 0)
     drawlines(cdst,lines)
-    drawlines(src,lines)
+    drawlines(srcoriginal,lines)
     
     #draw lines on image - probabalistic
     #orignally 50/10
     linesP = cv.HoughLinesP(skel, 1, np.pi / 180, 50, None, 50, 15)
     drawlinesp(cdstP,linesP)
-    drawlinesp(src,linesP)
+    drawlinesp(srcoriginal,linesP)
 
     
     # gets the centre point of the data
@@ -555,7 +567,7 @@ def main(default_k_value, file_to_write, file_accuracy):
     cdstP = drawlinesCentre(cdstP, central_point)
 
     if show_image:
-        cv.imshow("Original Source", src)
+        cv.imshow("Original Source", srcoriginal)
         #cv.imshow("Cannied", dst)
         #cv.imshow("Histogramed", histo)
         cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
@@ -612,21 +624,22 @@ if __name__ == "__main__":
 
     #removed a lot of writes
     print("--- Starting ---")
-    what_were_testing = "perfect_case"
+    what_were_testing = "test"
 
     print("--- Finding Files ---")
     files_to_run = []
-    path = "testcase/"
+    path = "windows/"
     for root, dirs, files in os.walk(path):
         for name in files:
-            if name.endswith(".png"):
+            if name.endswith(".png"): 
                 files_to_run.append(name)
     
     print("--- Files Found ---")
-    for j in range(4):
+    for j in range(1):
         file_accuracy = 0
-        file_to_write_to_global = "Data_k"+str(int(j+2))+"_"+what_were_testing+".txt"
-        file_to_write_to_times = "Data_Times_k"+str(int(j+2))+"_"+what_were_testing+".txt"
+        default_k_value = j+3
+        file_to_write_to_global = "Data_k"+str(default_k_value)+"_"+what_were_testing+".txt"
+        file_to_write_to_times = "Data_Times_k"+str(default_k_value)+"_"+what_were_testing+".txt"
 
         f = open(file_to_write_to_global,"w")
         #simple header
@@ -637,7 +650,6 @@ if __name__ == "__main__":
         p.close()
         for i in range(len(files_to_run)):
             default_file = path+str(files_to_run[i])
-            default_k_value = j+2 #2 3 4 5 6
             print(default_file)
             start = time.time()
             file_accuracy = main(default_k_value, file_to_write_to_global, file_accuracy)

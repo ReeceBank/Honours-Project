@@ -1,1 +1,1 @@
-cv.imshow
+disk(1

@@ -13,68 +13,27 @@ from versions.linedrawer import drawlines, drawlinesp
 #https://medium.com/analytics-vidhya/skeletonization-in-python-using-opencv-b7fa16867331
 version_name = "v031"
 
-default_file = 'sourceimages/rowtest.png' #tested with julians images
+default_file = 'testcase/bad_13_300.png' #tested with julians images
 default_parameter_list = []
 
 def run(src_image, parameter_list):
     # Loads an image
     src = cv.imread(cv.samples.findFile(src_image), cv.IMREAD_ANYCOLOR)
     cv.imshow("Input", src)
+    print(src)
 
     #extract the blue,green,red bands
-    b,g,r = cv.split(src)
-
+    greensrc = np.copy(src)
     #we disregard red and blue
-    greensrc = 2*g-r-b
+    for n in range(len(greensrc)):
+        for i in range(len(greensrc[0])):
+            greensrc[n][i][0] = max(2*greensrc[n][i][1]-greensrc[n][i][0]-greensrc[n][i][2],0)
+            greensrc[n][i][1] = max(2*greensrc[n][i][1]-greensrc[n][i][0]-greensrc[n][i][2],0)
+            greensrc[n][i][2] = max(2*greensrc[n][i][1]-greensrc[n][i][0]-greensrc[n][i][2],0)
     
-    #output canny (not good)
-    #easy placeholder until morphological pruning
-    greensrc = cv.Canny(greensrc, 280, 290, None, 3)
+    cv.imshow("greensrc", greensrc)
+    cv.waitKey()
 
-    #-------------------------------------------alternate
-    #at first glance it appears to have the same end results as v030
-
-    # Threshold the image
-    ret,img = cv.threshold(greensrc, 127, 255, 0)
-
-    # Step 1: Create an empty skeleton
-    size = np.size(img)
-    skel = np.zeros(img.shape, np.uint8)
-
-    # Get a Cross Shaped Kernel
-    element = cv.getStructuringElement(cv.MORPH_CROSS, (3,3))
-    # Repeat steps 2-4
-    while True:
-        #Step 2: Open the image
-        open = cv.morphologyEx(img, cv.MORPH_OPEN, element)
-        #Step 3: Substract open from the original image
-        temp = cv.subtract(img, open)
-        #Step 4: Erode the original image and refine the skeleton
-        eroded = cv.erode(img, element)
-        skel = cv.bitwise_or(skel,temp)
-        img = eroded.copy()
-        # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
-        if cv.countNonZero(img)==0:
-            break
-
-    #-------------------------------------------end
-    # Copy edges to the images that will display the results in BGR
-    csrc = cv.cvtColor(skel, cv.COLOR_GRAY2BGR)
-
-    #copys to draw lines on
-    srchough = np.copy(csrc)
-    srchoughp = np.copy(csrc)
-
-    #draw lines on image - non probabalistic
-    lines = cv.HoughLines(skel, 1, np.pi / 180, 130, None, 0, 0)
-    drawlines(srchough,lines)
-    
-    #draw lines on image - probabalistic
-    linesP = cv.HoughLinesP(skel, 1, np.pi / 180, 50, None, 50, 10)
-    drawlinesp(srchoughp,linesP)
-
-    #view the green extracted image
-    cv.imshow("Source", csrc)
     
     cv.waitKey()
     return 0
