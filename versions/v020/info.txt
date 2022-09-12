@@ -1,5 +1,0 @@
-v0.2 - Hough with canny, combined with green channel extraction
-
-An improved version of the Hough using a canny edge detector applied to an adjusted formula of green band extraction.
-
-The formula follows green enchanced with the red and blue channels subtracted from it. Refer to v0.21 for adjustable formula.

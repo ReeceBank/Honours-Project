@@ -1,6 +1,0 @@
-version 0.5 - overlapping window
-
-PH for now as i figure out how to transition file functions
-
-The function in this version is to take the original sliding window and introduct a % overlap to improve accuracy.
-May be a part of the orignal window extraction function instead, so this will be only a bookmark.

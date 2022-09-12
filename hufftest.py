@@ -19,32 +19,24 @@ from versions.linedrawer import drawlines, drawlinesp, drawlinesCentre
 #pip install scipy #stats for stdev
 #pip install scikit-image #disk elements
 
-#obersvations:
-#v0.3 has issues because of cannying the kmeans
-#when no quantization: kmeans 6 and above causes issues (no images, too much removed etc)
-#with quantization this doesnt occur, k of 12+ still generates WORKING IMAGES, HAZA! i guess.
-#the ideal image would always be at 45 degrees. anomalous images have high stdev (0.7) and clean have low (0.08)
-
-    #notes on closing: with window.png, 1 iteration, 5x5 rect
-    # Standard Lines
-    # stdev from 0 to 0 (lol)
-    # mean from 72.25 to 72.25 (expected)
-    # linecount from 19 to 22 (amazing!)
-    # Probablistic Lines
-    # stdev from 0.5508 to 0.5334 (better)
-    # mean from 86.624 to 88.911 (better)
-    # linecount from 75 to 64 (argubly worse?)
-
 show_image = False
 default_file = 'sourceimages/window4.png' #test image
 default_k_value = 2
 
 def kmeans(input_image, k_value):
-    #A kmeans clusters algorithm that takes in an image (ideally grayscale) and applies a binerization to them.
-    print("Kmeans")
-    #kmeans ---------------------
+    """
+    Preprocessing Method. Applies k-means clustering follower by binarization to a given input image. 
+    Returns the binarized image.
 
-    #for when the passed image is actually the name not the array of the image (ie when called first in a modular situation)
+    @input_image: input image. Any band.
+    @k_value: number of clusters to seperate the pixel data into.
+    @return: the binarized image.
+    """
+    #A kmeans clusters algorithm that takes in an image (ideally grayscale) and applies a binerization to them.
+    #kmeans clusters process:
+    print("K-means Started") #steps taken from opencv documentation.
+
+    #safty check that image is an image.
     if isinstance(input_image, str):
         input_image = cv.imread(input_image) # Loading image
     
@@ -54,36 +46,39 @@ def kmeans(input_image, k_value):
     # Convert to float type only for supporting cv2.kmean
     pixel_vals = np.float32(pixel_vals)
 
-    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0) #criteria
+    #criteria to go to until finished. Set to 100 iterations or 100%.
+    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 1.0)
     k = k_value # Choosing number of cluster
     retval, labels, centers = cv.kmeans(pixel_vals, k, None, criteria, 100, cv.KMEANS_RANDOM_CENTERS) 
 
     
     centers = np.uint8(centers) # convert data into 8-bit values 
-    #print("centres: ",centers)
     segmented_data = centers[labels.flatten()] # Mapping labels to center points( RGB Value)
     segmented_image = segmented_data.reshape((image.shape)) # reshape data into the original image dimensions
     
-    print("Kmeans Complete")
-    #quick check to see the minmax of the kmeans (probably an easier way using)
-    print("Binerization")
+    print("K-means Complete")
+
+    #binarization process:
+    print("Binerization Started")
     min = 999
     max = -1
+
+    #check the new image for which cluster to binarized.
     for n in range(len(segmented_image)):
         for i in range(len(segmented_image[0])):
             if (segmented_image[n][i][0] > max):
                 max = segmented_image[n][i][0]
-                #print("new max found", max)
             elif (segmented_image[n][i][0] < min):
                 min = segmented_image[n][i][0]
-                #print("new min found", min)
     
+    #binarized the image based on the threshold found.
     for n in range(len(segmented_image)):
         for i in range(len(segmented_image[0])):
             if (segmented_image[n][i][0] > min):
                 segmented_image[n][i] = [0,0,0] #the not rows
             elif (segmented_image[n][i][0] <= min):
                 segmented_image[n][i] = [255,255,255] #the rows (painting them white)
+
     print("Binerization Complete")
     if show_image:
         cv.imshow("Kmeans extraction", segmented_image)
@@ -95,28 +90,42 @@ def kmeans(input_image, k_value):
     return segmented_image #the kmeans image
 
 def histogramEqualization(input_image):
+    """
+    Preprocessing Method. Applies Histogram Equalization to a given input image. 
+    Returns the histogramed image.
+
+    @input_image: input image of ideally grayscale.
+    @return: Histogram equalized image.
+    """
     #A histogram equalization function that takes in an input image and equalizes the colour variance. 
     #Recommended by Patrick to fix the issue where some tif have heavy shading due to cliffs/clouds.
     #Ideally takes in a grayscale image.
-    print("Histogram Equalization")
+    print("Histogram Equalization Started")
 
-    #for when the passed image is actually the name not the array of the image (ie when called first in a modular situation)
+    #safty check that image is an image.
     if isinstance(input_image, str):
         input_image = cv.imread(input_image) # Loading image
 
-    c_image = cv.cvtColor(input_image, cv.COLOR_BGR2GRAY) # convert to grayscale
-    histo_image = cv.equalizeHist(c_image)
+    #grayscale anyway, safty first.
+    c_image = cv.cvtColor(input_image, cv.COLOR_BGR2GRAY)
+    histo_image = cv.equalizeHist(c_image) 
+
     print("Histogram Equalization Complete")
     return histo_image
 
 def colourQuantize(input_image):
-    #reduces the colour spectrum from 255*255*255 colour variations to 4*4*4 total variations
-    #ideally takes in NON grayscale image, RGB only. (or other 3 channel images)
-    quantize_count = 12 #how many variation to reduce to. static value because i planned to try out more than 12 combinations.
-    #take in an image and reduce it down to max of 12 channel types, [0 64 128 255] for r,g,b
-    print("Colour Quantization")
+    """
+    Preprocessing Method. Applies a thresholding colour quantization to a given input image. 
+    Returns the colour quantized image.
 
-    #for when the passed image is actually the name not the array of the image (ie when called first in a modular situation)
+    @input_image = input image. Works with rgb and non-rgb
+    @return: colour quantized image
+    """
+    
+    print("Colour Quantization Started")
+    quantize_count = 12 #how many variation to reduce to.
+
+    #safty check that image is an image.
     if isinstance(input_image, str):
         input_image = cv.imread(input_image) # Loading image
     
@@ -125,6 +134,7 @@ def colourQuantize(input_image):
     if(quantize_count == 12): #default case when you want 12 total channel types (future work)
         for n in range(len(quantized_image)):
             for i in range(len(quantized_image[0])):
+                #r band quantized
                 if(quantized_image[n][i][0] < 64):
                     quantized_image[n][i][0] = 0
                 elif(quantized_image[n][i][0] < 128):
@@ -134,6 +144,7 @@ def colourQuantize(input_image):
                 else:
                     quantized_image[n][i][0] = 255
                 
+                #g band quantized
                 if(quantized_image[n][i][1] < 64):
                     quantized_image[n][i][1] = 0
                 elif(quantized_image[n][i][1] < 128):
@@ -143,6 +154,7 @@ def colourQuantize(input_image):
                 else:
                     quantized_image[n][i][1] = 255
                 
+                #b band quantized
                 if(quantized_image[n][i][2] < 64):
                     quantized_image[n][i][2] = 0
                 elif(quantized_image[n][i][2] < 128):
@@ -157,6 +169,13 @@ def colourQuantize(input_image):
 
 #extracting data functions
 def getThetaData(lines):
+    """
+    Generates a list of line degrees.
+    Takes in the lines data generated by the standard Hough Transform. 
+
+    @lines: list of lines generated by opencv's standard hough()
+    @return: List of degrees
+    """
     #give a lines list from opencv to get a list of slope values
     #for standard hough lines
     rho_data = []
@@ -174,6 +193,13 @@ def getThetaData(lines):
     return theta_data
 
 def getThetaDataP(linesP):
+    """
+    Generates a list of line degrees.
+    Takes in the lines data generated by the probablistic Hough Transform. 
+
+    @linesP: list of lines generated by opencv's probablistic hough()
+    @return: List of degrees
+    """
     #give a lines list from opencv to get a list of slope values
     #for the probabilistic opencv hough line version.
     theta_datap = []
@@ -199,8 +225,10 @@ def getThetaDataP(linesP):
 
     return theta_datap
 
-#graphing - reduntant
 def graphTheta(theta_data):
+    """
+    redundant
+    """
     #creates a simple line graph of slope values
     theta_data.sort()
     intervals = []
@@ -222,6 +250,9 @@ def graphTheta(theta_data):
 
 #redundant
 def cleanINFdata(data):
+    """
+    redundant
+    """
     #simple fix to inf data when determining slope
     # for i in range(len(data)):
     #     if data[i]>100:
@@ -232,7 +263,13 @@ def cleanINFdata(data):
 
 #central point functions
 def findCentrePoints(linesP):
-    #finds the centre points of the probablistic hough transform lines
+    """
+    Find the centre points of each lines. 
+    Takes in the lines data generated by the probablistic Hough Transform. 
+
+    @linesP: list of lines generated by opencv's probablistic hough()
+    @return: list of centre points in tuple, and a final overall central point.
+    """
     #very useful to determin anomolous images as the further from the centre of the image the cetral point is then the more likely its anomalous
 
     #a list (of tuples) of center point coordinates
@@ -257,23 +294,42 @@ def findCentrePoints(linesP):
             center_points.append(centre)
 
     #the overall central cluster point of all centre points
-    if(len(xcentres_list)>=1):
+    if(len(xcentres_list)>=1): #this comes first since its more common. minor optimization.
         central_point = (sum(xcentres_list)/len(xcentres_list),sum(ycentres_list)/len(ycentres_list))
-    else:
+    else: #safy check for when the image could find lines.
         central_point = (0,0)
 
     #returns the list of centres and the central cluster point of all lines
     return center_points, central_point
 
 def findCentreDistance(width,height,central_point):
+    """
+    Finds the distance between the central point of the lines found and the centre of the source image.
+    Returns the distance between these two points.
+
+    @width: width of the image
+    @height: height of the image
+    @central_point of line clusters.
+
+    @return: distance in pixels.
+    """
     image_central_point = (width/2,height/2)
     distance = math.dist(image_central_point,central_point)
 
     return distance
 
 def findCentralAccuracy(width,height,central_point):
-    #a percentage mesure of how close the cluster centre is to the centre of the image
-    #with 100% being dead centre and 0% being completely off image.
+    """
+    Finds a percentage measure of how close the line cluster central is to the centre of the image.
+    with 100% being dead centre and 0% being completely off image.
+
+    
+    @width: width of the image
+    @height: height of the image
+    @central_point of line clusters.
+
+    @return: percentage measure of centre accuracy.
+    """
     image_width = width/2
     image_height = height/2
     central_width = central_point[0]
@@ -288,35 +344,35 @@ def findCentralAccuracy(width,height,central_point):
 
 #morphologyex functions
 def MorphSkeleton(image, kernal=None):   
-    #code taken from 
     '''
-    Skeletonizes a given image
-    @image: input image to skeletonize
+    Refinement Method. Skeletonizes a given image. Returns the skeletonized image.
+    Must follow after preprocessing methods. 
+
+    @image: input image to skeletonize.
     @kernal: kernal to use, default to 3x3 cross if none given
     @return: the skeletonized image
     '''    
-    print("Skeletonizing")
+    print("Skeletonizing Started")
     #check that input is image 
     if isinstance(image, str):
         image = cv.imread(image) # Loading image
     
     skel = np.zeros(image.shape, np.uint8)
-    # Get a Cross Shaped Kernel
+    # Use a cross Kernel by default.
     element = kernal
     if(element == None):
         element = cv.getStructuringElement(cv.MORPH_CROSS, (3,3))
 
-    # Repeat steps 2-4
+    #repeat until image has been skeletonized
+    #not own implimentation. Common way of doing it but taken from:
+    #https://medium.com/analytics-vidhya/skeletonization-in-python-using-opencv-b7fa16867331
     while True:
-        #Step 2: Open the image
         open = cv.morphologyEx(image, cv.MORPH_OPEN, element)
-        #Step 3: Substract open from the original image
         temp = cv.subtract(image, open)
-        #Step 4: Erode the original image and refine the skeleton
-        eroded = cv.erode(image, element)
+        eroded = cv.erode(image, element) 
         skel = cv.bitwise_or(skel,temp)
         image = eroded.copy()
-        # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
+        #if image has been completely eroded, stop
         if cv.countNonZero(image)==0:
             break
     
@@ -324,6 +380,17 @@ def MorphSkeleton(image, kernal=None):
     return skel
 
 def MorphOpenClose(image, kernal_open=None,kernal_close=None, iterations_open=None, iterations_close=None):
+    """
+    Refinement Method. Applies a opening followed by a closing morphological operation to an image.
+
+    @image: input openclose.
+    @kernal_open: kernal to use for opening. default to disk kernal if none specified.
+    @kernal_close: kernal to use for closing. default to 4x4 rect kernal if none specified.
+    @iterations_open: number of iterations to apply opening. default to 1 if none specified
+    @iterations_close: number of iterations to apply closing. default to 1 if none specified
+    
+    @retun: the openclosed morph-operated image.
+    """
     #check that input is image 
     if isinstance(image, str):
         image = cv.imread(image) # Loading image
@@ -354,7 +421,18 @@ def MorphOpenClose(image, kernal_open=None,kernal_close=None, iterations_open=No
     return closing
 
 def MorphPrune(image, kernal_erode=None,kernal_prune=None, iterations_erode=None, iterations_prune=None):
-    #check that input is image 
+    """
+    Refinement Method. Applies a pruning operation to an image, perferably after morphological operations and before skeletonization.
+    Applies a erosion followed by an opening.
+
+    @image: input image to prune.
+    @kernal_erode: kernal to use for erosion. default to 2x2 rect kernal if none specified.
+    @kernal_prune: kernal to use for opening. default to 'line' kernal if none specified.
+    @iterations_erode: number of iterations to apply eroison. default to 1 if none specified
+    @iterations_prune: number of iterations to apply opening. default to 1 if none specified
+    
+    @retuns the pruned image.
+    """
     if isinstance(image, str):
         image = cv.imread(image) # Loading image
     
@@ -383,21 +461,51 @@ def MorphPrune(image, kernal_erode=None,kernal_prune=None, iterations_erode=None
 
     return prune
 
-# Anomaly Functions
-def AnomalyDecide(accuracy, line_data, line_datap):
-    #base cases to judge failure by
-    line_count_min = 5
-    line_std_min = 1.0
-    accuracy_min = 81
+def MorphExFull(in_image):
+    """
+    Refinement Method. Takes in a given input image and applies two iterations of open-closing, followed by one iteration of pruning.
 
-    #tests run
+    @in_image: input image.
+    @return: Fully morphologically operated image.
+    """
+    image = in_image
+    if isinstance(in_image, str):
+        image = cv.imread(image) # Loading image
+
+    #double openclose
+    image = MorphOpenClose(image)
+    image = MorphOpenClose(image)
+
+    #prune
+    image = MorphPrune(image)
+
+    return image
+# Anomaly Functions
+def AnomalyDecide(accuracy, line_data, line_datap, line_min_thres=None,std_dev_thres=None,accuracy_thres=None):
+    """
+    Classifer used to decide whether an image is anomalous or not. Takes in data about the lines.
+    """
+    #base cases to judge failure by
+    line_count_min = line_min_thres
+    if(line_count_min == None):
+        line_count_min = 5 #default min line count
+    
+    line_std_min = std_dev_thres
+    if(line_std_min == None):
+        line_std_min = 1.0 #default min stdev
+
+    accuracy_min = accuracy_thres
+    if(accuracy_min == None):
+        accuracy_min = 81 #default min accuracy
+
+    #tests that it failed. For analytics.
     line_count_0_failed = False
     line_count_n0_failed = False
     line_stdev_failed = False
     accuracy_failed = False
-    #total times failed
+    #total tests failed
     failure_count = 0
-    #list of test results
+    #which tests failed
     failed_cases = []
 
     #complete failure, very likely its anomalous
@@ -429,35 +537,27 @@ def AnomalyDecide(accuracy, line_data, line_datap):
     return (line_count_0_failed or line_count_n0_failed or line_stdev_failed or accuracy_failed), failure_count, failed_cases
 
 def updateGlobalAccuracy(accuracy_passed_to_me):
+    """
+    For data analytics. Counts total accuracy. Personal use.
+    """
     accuracy_passed_to_me+=1
     return accuracy_passed_to_me
 
 def AnomalyDataCollection(file_to_write_to, image_name, image_height, image_width, accuracy, line_data, line_datap, is_anomalous, failure_count):
+    """
+    For data analystics. Writes information to a file. Personal use.
+    """
     f = open(file_to_write_to, "a")
 
     f.write(str(image_name)+" ")
-    #f.write(str(image_height)+" ")
-    #f.write(str(image_width)+" ")
     f.write(str(round(accuracy,2))+" ")
-
-    #if len(line_data) >= 1:
-    #    f.write(str(round(circstd(line_data),2))+" ")
-        #f.write(str(round(circmean(line_data),2))+" ")
-    #    f.write(str(len(line_data))+" ")
-
-    #else: #if no linedata is present (bad anomaly)
-    #    f.write("0"+" ")
-        #f.write("-1"+" ")
-    #    f.write("0"+" ")
 
     if len(line_datap) >= 1:
         f.write(str(round(circstd(line_datap),2))+" ")
-        #f.write(str(round(circmean(line_datap),2))+" ")
         f.write(str(len(line_datap))+" ")
 
     else: #if no linedata is present (bad anomaly)
         f.write("0"+" ")
-        #f.write("-1"+" ")
         f.write("0"+" ")
 
     if(is_anomalous):
@@ -471,8 +571,15 @@ def AnomalyDataCollection(file_to_write_to, image_name, image_height, image_widt
     f.close()
     return 0
 
-def GreenExtract(image):
-    #check image
+def greenExtract(in_image):
+    """
+    Side Preprocessing Method. Applies the green extract method to a given image. Must be an RGB image band (or BGR).
+
+    @in_image: input image in 3 channel band with middle channel being green.
+    @return: green extracted image.
+    """
+    #safty check that image is an image.
+    image = in_image
     if isinstance(image, str):
         image = cv.imread(image) # Loading image
 
@@ -487,11 +594,47 @@ def GreenExtract(image):
     
     return greensrc
 
+def cannyEdge(in_image, in_kernal = None, lowerband_in=None, upperband_in=None):
+    """
+    Refinement Method. Applies the canny edge detector algorithm to an image to highlight edges. Ideally in the binarized image.
+    
+    @in_image: input image to canny
+    @in_kernal: input kernal to use for guassian blur. default to 5x5 rect if none specificed.
+    @lowerband_in: lowerband to use for canny. default to 20 if non specified.
+    @Upperband_in: upperband to use for canny. default to 100 if non specified.
+
+    @return: canny edged image.
+    """
+    #check image
+    image = in_image
+    if isinstance(image, str):
+        image = cv.imread(image) # Loading image
+
+    #kernal to use for guassian blur
+    gauss_kernal = in_kernal
+    if(gauss_kernal == None):
+        gauss_kernal = (5,5)
+    
+    #lowerband of canny
+    lowerband = lowerband_in
+    if(lowerband==None):
+        lowerband = 20
+
+    #upperband of canny
+    upperband = upperband_in
+    if(upperband==None):
+        upperband = 100
+
+    blured_image = cv.GaussianBlur(image,gauss_kernal,0)
+    canny_image = cv.Canny(blured_image,lowerband,upperband)
+
+    return canny_image
+
 def main(default_k_value, file_to_write, file_accuracy):
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
     srcoriginal = cv.imread(cv.samples.findFile(default_file))
-    #src = GreenExtract(src)
+    #src = greenExtract(src)
     #if show_image:
     #    cv.imshow("GreenExtract", src)
     src = histogramEqualization(src)
@@ -500,34 +643,36 @@ def main(default_k_value, file_to_write, file_accuracy):
     src = colourQuantize(src)
     if show_image:
         cv.imshow("colourQuantize", src)
-    kme = kmeans(src,default_k_value)
+    src = kmeans(src,default_k_value)
     if show_image:
-        cv.imshow("kmeans", kme)
+        cv.imshow("kmeans", src)
 
 
     # A group of kernals
-    kernelrect = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
-    kernelcros = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
-    kernelline = cv.getStructuringElement(cv.MORPH_RECT, (3, 1))
-    kerneldiam = diamond(2)
-    kerneldisk = disk(1)
+    #kernelrect = cv.getStructuringElement(cv.MORPH_RECT, (4, 4))
+    #kernelcros = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
+    #kernelline = cv.getStructuringElement(cv.MORPH_RECT, (3, 1))
+    #kerneldiam = diamond(2)
+    #kerneldisk = disk(1)
 
-    first_openclose = MorphOpenClose(kme)
-    second_openclose = MorphOpenClose(first_openclose)
+    #double openclose
+    src = MorphOpenClose(src)
+    src = MorphOpenClose(src)
 
-    #kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    #opening3 = cv.morphologyEx(erosion, cv.MORPH_OPEN, kernel, iterations=1)
+    #prune
+    src = MorphPrune(src)
+    if show_image:
+        cv.imshow("MorphPrune", src)
+
+    #skeletonization
+    src = MorphSkeleton(src)
+    if show_image:
+        cv.imshow("MorphSkeleton", src)
+
+        
+    #src = cannyEdge(src)
     #if show_image:
-    #    cv.imshow("Opening3", opening3)
-    prune = MorphPrune(second_openclose)
-    if show_image:
-        cv.imshow("MorphPrune", prune)
-
-    # Step 1: Create an empty skeleton
-    #size = np.size(img)
-    skel = MorphSkeleton(prune)
-    if show_image:
-        cv.imshow("MorphSkeleton", skel)
+    #    cv.imshow("CannyEdge", src)
     
     #output canny (not good)
     #easy placeholder until morphological pruning
@@ -535,19 +680,19 @@ def main(default_k_value, file_to_write, file_accuracy):
 
 
     # Copy edges to the images that will display the results in BGR
-    cdst = cv.cvtColor(skel, cv.COLOR_GRAY2BGR)
+    cdst = cv.cvtColor(src, cv.COLOR_GRAY2BGR)
     cdstP = np.copy(cdst)
 
     #draw lines on image - non probabalistic
     #accumulator min dependent on image
     # testing found with big spaced trees = 150, smaller 200x200 windows = 50
-    lines = cv.HoughLines(skel, 1, np.pi / 180, 100, None, 0, 0)
+    lines = cv.HoughLines(src, 1, np.pi / 180, 100, None, 0, 0)
     drawlines(cdst,lines)
     drawlines(srcoriginal,lines)
     
     #draw lines on image - probabalistic
     #orignally 50/10
-    linesP = cv.HoughLinesP(skel, 1, np.pi / 180, 50, None, 50, 15)
+    linesP = cv.HoughLinesP(src, 1, np.pi / 180, 50, None, 50, 15)
     drawlinesp(cdstP,linesP)
     drawlinesp(srcoriginal,linesP)
 
@@ -605,7 +750,7 @@ def main(default_k_value, file_to_write, file_accuracy):
             file_accuracy = updateGlobalAccuracy(file_accuracy)
 
     if(not is_image_anomalous):
-        if "good" in default_file:
+        if "window" in default_file:
             file_accuracy = updateGlobalAccuracy(file_accuracy)
 
     #if(not is_image_anomalous):
@@ -624,11 +769,11 @@ if __name__ == "__main__":
 
     #removed a lot of writes
     print("--- Starting ---")
-    what_were_testing = "test"
+    what_were_testing = "canny_only"
 
     print("--- Finding Files ---")
     files_to_run = []
-    path = "windows/"
+    path = "sourceimages/"
     for root, dirs, files in os.walk(path):
         for name in files:
             if name.endswith(".png"): 

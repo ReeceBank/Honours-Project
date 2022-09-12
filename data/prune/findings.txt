@@ -2,4 +2,6 @@ prune with no HE is just worse than prune in all cases(could be due to CQ). Proc
 
 prune with no CQ seems to perform better than with CQ under low K but same at higher K (83% rate)
 
-disk 3 always worse
+disk 3 always worse (duh. bigger disk=more erosion==more missclassification)
+
+these findings are obvious (if you have a clue how morphological ex work) so i dont see the need to talk about it honestly. nothing 'new' found.
