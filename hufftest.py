@@ -10,7 +10,16 @@ from scipy.stats import circstd, circmean
 from skimage.morphology import disk, diamond
 #modules
 from statistics import stdev, mean
-from versions.linedrawer import drawlines, drawlinesp, drawlinesCentre
+from modules.linedrawer import *
+
+from modules.kmeansbinarization import *
+from modules.histogramequalization import *
+from modules.colourquantization import *
+from modules.morphologicaloperations import *
+from modules.skeletonization import *
+from modules.cannyedge import *
+from modules.greenextract import *
+from modules.classifier import *
 
 
 #required installs:
@@ -21,8 +30,8 @@ from versions.linedrawer import drawlines, drawlinesp, drawlinesCentre
 
 show_image = False
 default_file = 'sourceimages/window4.png' #test image
-default_k_value = 2
-
+#default_k_value = 2
+'''
 def kmeans(input_image, k_value):
     """
     Preprocessing Method. Applies k-means clustering follower by binarization to a given input image. 
@@ -88,7 +97,8 @@ def kmeans(input_image, k_value):
     # ------------------ kmeans
     print("Kmeans-Binerization Complete")
     return segmented_image #the kmeans image
-
+'''
+'''
 def histogramEqualization(input_image):
     """
     Preprocessing Method. Applies Histogram Equalization to a given input image. 
@@ -112,7 +122,8 @@ def histogramEqualization(input_image):
 
     print("Histogram Equalization Complete")
     return histo_image
-
+'''
+'''
 def colourQuantize(input_image):
     """
     Preprocessing Method. Applies a thresholding colour quantization to a given input image. 
@@ -166,8 +177,8 @@ def colourQuantize(input_image):
         
     print("Colour Quantization Complete")
     return quantized_image
-
-#extracting data functions
+'''
+'''#extracting data functions
 def getThetaData(lines):
     """
     Generates a list of line degrees.
@@ -224,7 +235,9 @@ def getThetaDataP(linesP):
     #print(theta_datap)
 
     return theta_datap
+'''
 
+'''
 def graphTheta(theta_data):
     """
     redundant
@@ -247,20 +260,8 @@ def graphTheta(theta_data):
     plt.show()
 
     return 0
-
-#redundant
-def cleanINFdata(data):
-    """
-    redundant
-    """
-    #simple fix to inf data when determining slope
-    # for i in range(len(data)):
-    #     if data[i]>100:
-    #         data[i] = 100
-    #     elif  data[i]<-100:
-    #         data[i] = -100
-    return data
-
+'''
+'''
 #central point functions
 def findCentrePoints(linesP):
     """
@@ -341,17 +342,18 @@ def findCentralAccuracy(width,height,central_point):
 
     accuracy_percentage = (xoffset_percentage+yoffset_percentage)/2
     return accuracy_percentage
-
+'''
+'''
 #morphologyex functions
 def MorphSkeleton(image, kernal=None):   
-    '''
+    """
     Refinement Method. Skeletonizes a given image. Returns the skeletonized image.
     Must follow after preprocessing methods. 
 
     @image: input image to skeletonize.
     @kernal: kernal to use, default to 3x3 cross if none given
     @return: the skeletonized image
-    '''    
+    """
     print("Skeletonizing Started")
     #check that input is image 
     if isinstance(image, str):
@@ -480,8 +482,10 @@ def MorphExFull(in_image):
     image = MorphPrune(image)
 
     return image
-# Anomaly Functions
-def AnomalyDecide(accuracy, line_data, line_datap, line_min_thres=None,std_dev_thres=None,accuracy_thres=None):
+'''
+
+'''# Anomaly Functions
+def AnomalyDecide(accuracy, line_datap, line_min_thres=None,std_dev_thres=None,accuracy_thres=None):
     """
     Classifer used to decide whether an image is anomalous or not. Takes in data about the lines.
     """
@@ -535,7 +539,7 @@ def AnomalyDecide(accuracy, line_data, line_datap, line_min_thres=None,std_dev_t
 
     #boolean operation, if any failed it returns True of if image is anomalous
     return (line_count_0_failed or line_count_n0_failed or line_stdev_failed or accuracy_failed), failure_count, failed_cases
-
+'''
 def updateGlobalAccuracy(accuracy_passed_to_me):
     """
     For data analytics. Counts total accuracy. Personal use.
@@ -570,7 +574,7 @@ def AnomalyDataCollection(file_to_write_to, image_name, image_height, image_widt
     f.write("\n")
     f.close()
     return 0
-
+'''
 def greenExtract(in_image):
     """
     Side Preprocessing Method. Applies the green extract method to a given image. Must be an RGB image band (or BGR).
@@ -593,7 +597,8 @@ def greenExtract(in_image):
             greensrc[n][i][2] = max(2*greensrc[n][i][1]-greensrc[n][i][0]-greensrc[n][i][2],0)
     
     return greensrc
-
+'''
+'''
 def cannyEdge(in_image, in_kernal = None, lowerband_in=None, upperband_in=None):
     """
     Refinement Method. Applies the canny edge detector algorithm to an image to highlight edges. Ideally in the binarized image.
@@ -629,7 +634,7 @@ def cannyEdge(in_image, in_kernal = None, lowerband_in=None, upperband_in=None):
     canny_image = cv.Canny(blured_image,lowerband,upperband)
 
     return canny_image
-
+'''
 def main(default_k_value, file_to_write, file_accuracy):
     # Loads an image
     src = cv.imread(cv.samples.findFile(default_file))
@@ -704,8 +709,8 @@ def main(default_k_value, file_to_write, file_accuracy):
     image_width = len(src[0])
     print("Image Height: ", image_height)
     print("Image Width: ", image_width)
-    distance = findCentreDistance(image_width, image_height, central_point)
-    print("Distance from Centre to Central: ", distance)
+    #distance = findCentreDistance(image_width, image_height, central_point)
+    #print("Distance from Centre to Central: ", distance)
     accuracy = findCentralAccuracy(image_width, image_height, central_point)
     print("Accuracy of Central: ", str(int(accuracy))+str('%'))
 
@@ -723,11 +728,8 @@ def main(default_k_value, file_to_write, file_accuracy):
 
 
     # looking at some stats
-    theta_data = getThetaData(lines)
-    theta_dataP = getThetaDataP(linesP)
-
-    clean_theta_data = cleanINFdata(theta_data)
-    clean_theta_dataP = cleanINFdata(theta_dataP)
+    clean_theta_data = getThetaData(lines)
+    clean_theta_dataP = getThetaDataP(linesP)
 
     #print("Line data: ", clean_theta_data)
     if len(clean_theta_data) >= 2:
@@ -740,7 +742,7 @@ def main(default_k_value, file_to_write, file_accuracy):
         print("Mean of line dataP: ", circmean(clean_theta_dataP))
         print("Count of line dataP: ", len(clean_theta_dataP))
 
-    is_image_anomalous, failure_count, failed_tests  = AnomalyDecide(accuracy, clean_theta_data, clean_theta_dataP)
+    is_image_anomalous, failure_count, failed_tests  = AnomalyDecide(accuracy, clean_theta_dataP)
     AnomalyDataCollection(file_to_write, default_file, image_height, image_width, accuracy, clean_theta_data, clean_theta_dataP, is_image_anomalous, failure_count)
 
     
@@ -750,12 +752,8 @@ def main(default_k_value, file_to_write, file_accuracy):
             file_accuracy = updateGlobalAccuracy(file_accuracy)
 
     if(not is_image_anomalous):
-        if "window" in default_file:
+        if "good" in default_file:
             file_accuracy = updateGlobalAccuracy(file_accuracy)
-
-    #if(not is_image_anomalous):
-    #    if "window" in default_file:
-    #        file_accuracy = updateGlobalAccuracy(file_accuracy)
     
     cv.waitKey()
     return file_accuracy
@@ -773,7 +771,7 @@ if __name__ == "__main__":
 
     print("--- Finding Files ---")
     files_to_run = []
-    path = "sourceimages/"
+    path = "windows/"
     for root, dirs, files in os.walk(path):
         for name in files:
             if name.endswith(".png"): 
