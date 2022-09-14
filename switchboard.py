@@ -1,5 +1,6 @@
 #Switch board to switch between versions
 from ast import Break
+from tkinter import E
 import cv2 as cv
 
 #modules
@@ -85,9 +86,10 @@ def modularCase(image_name, show_image,useHE,useCQ,useGE,useMorphs,useSkele,useC
 
     # looking at some stats
     clean_theta_dataP = getThetaDataP(linesP)
+    #classifier running
     is_image_anomalous, failure_count, failed_tests  = AnomalyDecide(accuracy, clean_theta_dataP)
 
-    if(is_image_anomalous):
+    if(is_image_anomalous): #display what the classifier thinks
         print("Image",image_name,"is anomalous.")
         print("Image",image_name,"failed",failure_count,"tests.")
         guessAnomalyType(failed_tests)
@@ -100,7 +102,7 @@ def modularCase(image_name, show_image,useHE,useCQ,useGE,useMorphs,useSkele,useC
 def allcase(image_name, show_image=False):    # Loads an image
     try:
         src = cv.imread(cv.samples.findFile(str("windows/"+image_name+".png")))
-    except:
+    except: #will spit out a opencv warning but thats out of my control.
         print("File not found:",str("windows/"+image_name+".png"))
         return None
 
@@ -153,9 +155,10 @@ def allcase(image_name, show_image=False):    # Loads an image
     # looking at some stats
     clean_theta_dataP = getThetaDataP(linesP)
 
+    #classifier running
     is_image_anomalous, failure_count, failed_tests  = AnomalyDecide(accuracy, clean_theta_dataP)
 
-    if(is_image_anomalous):
+    if(is_image_anomalous): #display what the classifier thinks
         print("Image",image_name,"is anomalous.")
         print("Image",image_name,"failed",failure_count,"tests.")
         guessAnomalyType(failed_tests)
@@ -187,49 +190,49 @@ if __name__ == "__main__":
             file_name = input('Enter file name\n')
 
             # show the images produced
-            show_image = input('Show final images? (y/n)')
+            show_image = input('Show final images? (y/n)\n')
             if (show_image == 'y'):
                 show_image = True
             else:
                 show_image = False
 
             #use Histogram Equalization
-            useHE = input('Use Histogram Equalization? (y/n)')
+            useHE = input('Use Histogram Equalization? (y/n)\n')
             if (useHE == 'y'):
                 useHE = True
             else:
                 useHE = False
 
             #use Colour Quantization
-            useCQ = input('Use Colour Quantization? (y/n)')
+            useCQ = input('Use Colour Quantization? (y/n)\n')
             if (useCQ == 'y'):
                 useCQ = True
             else:
                 useCQ = False
 
             #use Green Extract
-            useGE = input('Use Green Extract? (y/n) (not advised)')
+            useGE = input('Use Green Extract? (y/n) (not advised)\n')
             if (useGE == 'y'):
                 useGE = True
             else:
                 useGE = False
 
             #use Morphological Operations
-            useMorphs = input('Use Morphological Operations? (y/n)')
+            useMorphs = input('Use Morphological Operations? (y/n)\n')
             if (useMorphs == 'y'):
                 useMorphs = True
             else:
                 useMorphs = False
 
             #use Skeletonization
-            useSkele = input('Use Skeletonization? (y/n)')
+            useSkele = input('Use Skeletonization? (y/n)\n')
             if (useSkele == 'y'):
                 useSkele = True
             else:
                 useSkele = False
 
             #use Canny Edge Detector
-            useCanny = input('Use Canny Edge Detector? (y/n)')
+            useCanny = input('Use Canny Edge Detector? (y/n)\n')
             if (useCanny == 'y'):
                 useCanny = True
             else:
