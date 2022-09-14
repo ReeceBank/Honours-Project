@@ -5,7 +5,7 @@ from versions.v011 import v011
 from versions.v020 import v020
 from versions.v021 import v021
 from versions.v030 import v030
-from versions.v031 import v031
+from versions.v031 import v031 
 
 tested_versions = ['000','010','011','020','021','022','030','031']
 unfinished_versions = ['011','021'] #the versions i need to go back to and add parameterization
@@ -57,8 +57,8 @@ def switchBoard(version_to_run,src_image,parameter_list):
             print("Running Alpha v100 - All Combined")
             v100.run(src_image,parameter_list)
 
-
-
+#modules to check
+#HE CE CQ GE KM LD MO SK
 
 def runall():
     print("Running all",version_name,"Test Bench")

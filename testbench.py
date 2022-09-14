@@ -2,16 +2,14 @@ import sys
 import math
 import cv2 as cv
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 import time
+
 #external libraries functions
 from scipy.stats import circstd, circmean
-from skimage.morphology import disk, diamond
-#modules
-from statistics import stdev, mean
-from modules.linedrawer import *
 
+#modules
+from modules.linedrawer import * # for line drawing
 from modules.kmeansbinarization import *
 from modules.histogramequalization import *
 from modules.colourquantization import *
@@ -19,7 +17,7 @@ from modules.morphologicaloperations import *
 from modules.skeletonization import *
 from modules.cannyedge import *
 from modules.greenextract import *
-from modules.classifier import *
+from modules.classifier import * #for classification
 
 
 #required installs:
