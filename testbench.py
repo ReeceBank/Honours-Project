@@ -185,6 +185,7 @@ def main(default_k_value, file_to_write, file_accuracy):
             file_accuracy = updateGlobalAccuracy(file_accuracy)
     
     cv.waitKey()
+    cv.destroyAllWindows()
     return file_accuracy
 
 
@@ -196,7 +197,7 @@ if __name__ == "__main__":
 
     #removed a lot of writes
     print("--- Starting ---")
-    what_were_testing = "canny_only"
+    what_were_testing = "bestcase"
 
     print("--- Finding Files ---")
     files_to_run = []

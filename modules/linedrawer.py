@@ -59,31 +59,3 @@ def drawlinesCentre(image, central_point):
     cv.line(image, ((int(central_point[0])+5), int(central_point[1])), ((int(central_point[0])-5), int(central_point[1])), central_colour, line_thickness+1, cv.LINE_AA)
     cv.line(image, (int(central_point[0]), (int(central_point[1])+5)), (int(central_point[0]), (int(central_point[1])-5)), central_colour, line_thickness+1, cv.LINE_AA)
     return image
-
-#redudant as python is not OOP
-def setLineColour(value):
-    """
-    Sets the colour that the lines will be drawn in on the image. defaults to red.
-    @value: a 3 index'd array in bgr format eg: [0,0,255] for red lines.
-    """
-    draw_colour = value
-    return None
-
-def setThickness(value):
-    """
-    Sets the value for the thickness of the drawn lines.
-    @value: int greater than 0.
-    """
-    if (value < 0): #safty check
-        central_colour = 1
-    else:
-        central_colour = value
-    return None
-
-def setCentralColour(value):
-    """
-    Sets the colour that the central point will be drawn in on the image. defaults to blue.
-    @value: a 3 index'd array in bgr format eg: [255,0,0] for blue lines.
-    """
-    line_thickness = value
-    return None
